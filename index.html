@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Founders Poker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --felt: #0d4a2e;
+            --felt-dark: #0a3522;
+            --felt-light: #117a4a;
+            --gold: #d4a84b;
+            --gold-light: #e8c875;
+            --gold-dark: #a67c32;
+            --cream: #f5f0e6;
+            --cream-dim: rgba(245, 240, 230, 0.7);
+            --red: #c41e3a;
+            --red-light: #e63950;
+            --black: #1a1a1a;
+            --black-deep: #0d0d0d;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--felt-dark);
+            background-image:
+                radial-gradient(ellipse 100% 100% at 50% 50%, var(--felt) 0%, var(--felt-dark) 70%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            background-blend-mode: normal, overlay;
+            color: var(--cream);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px 24px 32px;
+            user-select: none;
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Vignette effect */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 100%);
+            pointer-events: none;
+        }
+
+        /* Subtle light from above */
+        body::after {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: 25%;
+            width: 50%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(255,255,255,0.03) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            padding-top: 20px;
+        }
+
+        /* Timer screen can be centered when there's enough vertical space */
+        @media (min-height: 800px) {
+            body {
+                justify-content: center;
+            }
+            .container {
+                padding-top: 0;
+            }
+        }
+
+        .brand {
+            margin-bottom: 20px;
+        }
+
+        .brand-name {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(24px, 5vw, 36px);
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 20px rgba(212, 168, 75, 0.3);
+            position: relative;
+        }
+
+        .brand-name::before,
+        .brand-name::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        .brand-name::before {
+            right: calc(100% + 16px);
+        }
+
+        .brand-name::after {
+            left: calc(100% + 16px);
+        }
+
+        .level-indicator {
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--gold);
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+
+        .timer-container {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .timer {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(90px, 26vw, 200px);
+            font-weight: 400;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.02em;
+            line-height: 1;
+            color: var(--cream);
+            text-shadow:
+                0 0 60px rgba(245, 240, 230, 0.2),
+                0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s ease;
+        }
+
+        .timer.warning {
+            color: var(--gold-light);
+            text-shadow:
+                0 0 80px rgba(212, 168, 75, 0.4),
+                0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .timer.critical {
+            color: var(--red-light);
+            text-shadow:
+                0 0 80px rgba(196, 30, 58, 0.5),
+                0 4px 12px rgba(0, 0, 0, 0.3);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        .timer.paused {
+            opacity: 0.4;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .blinds-container {
+            margin-bottom: 20px;
+        }
+
+        .blinds {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(48px, 13vw, 120px);
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            margin-bottom: 8px;
+            color: var(--cream);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .blinds-divider {
+            opacity: 0.4;
+            font-weight: 400;
+            margin: 0 0.05em;
+            color: var(--gold);
+        }
+
+        .ante {
+            font-size: clamp(16px, 3.5vw, 24px);
+            font-weight: 400;
+            color: var(--cream-dim);
+            letter-spacing: 0.05em;
+        }
+
+        .ante .value {
+            color: var(--gold);
+            font-weight: 500;
+        }
+
+        .next-level {
+            font-size: clamp(14px, 2.8vw, 18px);
+            font-weight: 400;
+            color: var(--cream-dim);
+            margin-bottom: 24px;
+            padding: 12px 24px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 8px;
+            border: 1px solid rgba(212, 168, 75, 0.15);
+            letter-spacing: 0.03em;
+        }
+
+        .next-level .label {
+            color: var(--gold);
+            opacity: 0.7;
+            margin-right: 10px;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.1em;
+        }
+
+        .rebuy-info {
+            font-size: clamp(11px, 2vw, 13px);
+            font-weight: 400;
+            color: var(--cream-dim);
+            margin-bottom: 16px;
+            padding: 6px 14px;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 6px;
+            border: 1px solid rgba(212, 168, 75, 0.1);
+            letter-spacing: 0.02em;
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
+        }
+
+        .rebuy-info:hover {
+            opacity: 1;
+        }
+
+        .rebuy-info.available {
+            border-color: rgba(17, 122, 74, 0.25);
+            background: rgba(17, 122, 74, 0.08);
+        }
+
+        .rebuy-info.unavailable {
+            opacity: 0.35;
+        }
+
+        .rebuy-info .label {
+            color: var(--gold);
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.12em;
+            font-weight: 500;
+            opacity: 0.8;
+        }
+
+        .rebuy-info .amount {
+            color: var(--gold-light);
+            font-weight: 600;
+        }
+
+        .rebuy-info .divider {
+            color: var(--cream-dim);
+            opacity: 0.3;
+            margin: 0 2px;
+        }
+
+        .rebuy-info .status {
+            font-size: 0.92em;
+            opacity: 0.8;
+        }
+
+        .controls {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        button {
+            font-family: 'Inter', sans-serif;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(212, 168, 75, 0.2);
+            color: var(--cream-dim);
+            padding: 14px 28px;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        button:hover {
+            background: rgba(0, 0, 0, 0.4);
+            border-color: rgba(212, 168, 75, 0.4);
+            color: var(--cream);
+        }
+
+        button:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+            border: 1px solid var(--gold-light);
+            color: var(--black-deep);
+            font-weight: 600;
+            padding: 18px 52px;
+            font-size: 15px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border-radius: 8px;
+            box-shadow:
+                0 4px 20px rgba(212, 168, 75, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold-light) 50%, var(--gold) 100%);
+            box-shadow:
+                0 6px 28px rgba(212, 168, 75, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            color: var(--black-deep);
+        }
+
+        .btn-primary.running {
+            background: linear-gradient(180deg, var(--red-light) 0%, var(--red) 100%);
+            border-color: var(--red-light);
+            box-shadow:
+                0 4px 20px rgba(196, 30, 58, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .btn-primary.running:hover {
+            background: linear-gradient(180deg, #e84a64 0%, var(--red-light) 100%);
+            box-shadow:
+                0 6px 28px rgba(196, 30, 58, 0.45),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border-color: rgba(212, 168, 75, 0.15);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(212, 168, 75, 0.1);
+            border-color: rgba(212, 168, 75, 0.3);
+        }
+
+        .btn-back {
+            opacity: 0.4;
+        }
+
+        .btn-back:hover {
+            opacity: 1;
+        }
+
+        .hold-hint {
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            color: var(--cream-dim);
+            margin-bottom: 24px;
+            opacity: 0.5;
+            text-transform: uppercase;
+        }
+
+        .extra-time-container {
+            margin-top: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .extra-time-label {
+            font-size: 10px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--cream-dim);
+            opacity: 0.6;
+        }
+
+        .extra-time-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-extra-time {
+            min-width: 60px;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(212, 168, 75, 0.2);
+            color: var(--cream-dim);
+            border-radius: 6px;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-extra-time:hover {
+            background: rgba(212, 168, 75, 0.15);
+            border-color: rgba(212, 168, 75, 0.4);
+            color: var(--gold-light);
+        }
+
+        .btn-extra-time:active {
+            background: rgba(212, 168, 75, 0.25);
+        }
+
+        .btn-extra-time.btn-minus {
+            border-color: rgba(196, 30, 58, 0.3);
+            color: rgba(230, 57, 80, 0.8);
+        }
+
+        .btn-extra-time.btn-minus:hover {
+            background: rgba(196, 30, 58, 0.15);
+            border-color: rgba(196, 30, 58, 0.5);
+            color: var(--red-light);
+        }
+
+        .btn-extra-time.btn-minus:active {
+            background: rgba(196, 30, 58, 0.25);
+        }
+
+        .level-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .level-btn {
+            width: 42px;
+            height: 42px;
+            padding: 0;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 50%;
+            color: var(--cream-dim);
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(212, 168, 75, 0.15);
+        }
+
+        .level-btn:hover {
+            color: var(--cream);
+            border-color: rgba(212, 168, 75, 0.4);
+            background: rgba(212, 168, 75, 0.1);
+        }
+
+        .level-btn.active {
+            background: linear-gradient(180deg, var(--gold-light), var(--gold-dark));
+            border-color: var(--gold);
+            color: var(--black-deep);
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(212, 168, 75, 0.35);
+        }
+
+        .level-btn.completed {
+            color: var(--gold);
+            border-color: rgba(212, 168, 75, 0.3);
+        }
+
+        .progress-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-light));
+            transition: width 0.5s linear;
+            box-shadow: 0 0 20px rgba(212, 168, 75, 0.5);
+        }
+
+        .progress-bar.warning {
+            background: linear-gradient(90deg, var(--gold-dark), var(--gold-light));
+        }
+
+        .progress-bar.critical {
+            background: linear-gradient(90deg, var(--red), var(--red-light));
+            box-shadow: 0 0 20px rgba(196, 30, 58, 0.6);
+        }
+
+        /* Decorative suits */
+        .suit {
+            position: fixed;
+            font-size: 120px;
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .suit-1 { top: 10%; left: 8%; transform: rotate(-15deg); }
+        .suit-2 { top: 15%; right: 10%; transform: rotate(20deg); }
+        .suit-3 { bottom: 15%; left: 12%; transform: rotate(10deg); }
+        .suit-4 { bottom: 10%; right: 8%; transform: rotate(-25deg); }
+
+        /* Chip stack decoration */
+        .chips {
+            position: fixed;
+            bottom: 40px;
+            left: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            opacity: 0.08;
+            pointer-events: none;
+        }
+
+        .chip {
+            width: 60px;
+            height: 12px;
+            background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-dark));
+            border-radius: 30px;
+            margin-top: -6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 600px) {
+            .suit { font-size: 80px; opacity: 0.02; }
+            .chips { display: none; }
+            .brand-name::before, .brand-name::after { width: 24px; }
+        }
+
+        /* ========== SCREEN MANAGEMENT ========== */
+        .screen {
+            display: none;
+            width: 100%;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* ========== SETUP SCREEN ========== */
+        .setup-container {
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .setup-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(24px, 5vw, 32px);
+            text-align: center;
+            color: var(--gold);
+            margin-bottom: 36px;
+            letter-spacing: 0.05em;
+        }
+
+        .setup-section {
+            margin-bottom: 32px;
+        }
+
+        .setup-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--gold);
+            opacity: 0.8;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .btn-adjust {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            font-size: 24px;
+            font-weight: 300;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(212, 168, 75, 0.3);
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .btn-adjust:hover {
+            background: rgba(212, 168, 75, 0.15);
+            border-color: var(--gold);
+        }
+
+        .setup-section input[type="number"] {
+            width: 80px;
+            height: 56px;
+            text-align: center;
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 28px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(212, 168, 75, 0.3);
+            border-radius: 8px;
+            color: var(--cream);
+            -moz-appearance: textfield;
+        }
+
+        .setup-section input[type="number"]::-webkit-outer-spin-button,
+        .setup-section input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .setup-section input[type="number"]:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .duration-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+        }
+
+        .duration-field {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .duration-field input {
+            width: 70px !important;
+            height: 50px !important;
+            font-size: 24px !important;
+        }
+
+        .duration-field span {
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--cream-dim);
+        }
+
+        /* Chips Selection */
+        .chips-grid {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .chip-option {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .chip-option input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .chip-value {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(212, 168, 75, 0.2);
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--cream-dim);
+            transition: all 0.2s ease;
+        }
+
+        .chip-option:hover .chip-value {
+            border-color: rgba(212, 168, 75, 0.5);
+            background: rgba(212, 168, 75, 0.1);
+        }
+
+        .chip-option input:checked + .chip-value {
+            background: linear-gradient(180deg, var(--gold-light), var(--gold-dark));
+            border-color: var(--gold);
+            color: var(--black-deep);
+            box-shadow: 0 4px 16px rgba(212, 168, 75, 0.35);
+        }
+
+        .setup-actions {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        /* ========== SUMMARY SCREEN ========== */
+        .summary-container {
+            padding: 20px;
+            max-width: 550px;
+            margin: 0 auto;
+        }
+
+        .stack-display {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 12px;
+            border: 1px solid rgba(212, 168, 75, 0.2);
+            margin-bottom: 24px;
+        }
+
+        .stack-label {
+            display: block;
+            font-size: 11px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+
+        .stack-value {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 42px;
+            font-weight: 500;
+            background: transparent;
+            border: none;
+            color: var(--cream);
+            text-align: center;
+            width: 180px;
+            -moz-appearance: textfield;
+        }
+
+        .stack-value::-webkit-outer-spin-button,
+        .stack-value::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .stack-value:focus {
+            outline: none;
+        }
+
+        .stack-hint {
+            display: block;
+            font-size: 12px;
+            color: var(--cream-dim);
+            margin-top: 4px;
+        }
+
+        /* Levels Table */
+        .levels-table-container {
+            max-height: 45vh;
+            overflow-y: auto;
+            margin-bottom: 24px;
+            border-radius: 8px;
+            border: 1px solid rgba(212, 168, 75, 0.15);
+        }
+
+        .levels-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .levels-table th {
+            position: sticky;
+            top: 0;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 12px 6px;
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--gold);
+            border-bottom: 1px solid rgba(212, 168, 75, 0.2);
+        }
+
+        .levels-table td {
+            padding: 8px 4px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .levels-table .level-num {
+            color: var(--gold);
+            font-weight: 500;
+        }
+
+        .levels-table input {
+            width: 55px;
+            padding: 6px 4px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(212, 168, 75, 0.15);
+            border-radius: 4px;
+            color: var(--cream);
+            font-size: 14px;
+            font-family: inherit;
+            -moz-appearance: textfield;
+        }
+
+        .levels-table input::-webkit-outer-spin-button,
+        .levels-table input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .levels-table input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .levels-table tr:hover {
+            background: rgba(212, 168, 75, 0.05);
+        }
+
+        .summary-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .btn-new-tournament {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 16px;
+            font-size: 12px;
+            letter-spacing: 0.05em;
+            z-index: 100;
+        }
+
+        .btn-fullscreen {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 16px;
+            font-size: 12px;
+            letter-spacing: 0.05em;
+            z-index: 100;
+        }
+
+        @media (max-width: 600px) {
+            .setup-container,
+            .summary-container {
+                padding: 16px;
+            }
+
+            .chip-value {
+                width: 56px;
+                height: 56px;
+                font-size: 16px;
+            }
+
+            .levels-table input {
+                width: 48px;
+                padding: 5px 2px;
+                font-size: 13px;
+            }
+
+            .stack-value {
+                font-size: 36px;
+                width: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Decorative elements -->
+    <div class="suit suit-1">&#9824;</div>
+    <div class="suit suit-2">&#9829;</div>
+    <div class="suit suit-3">&#9830;</div>
+    <div class="suit suit-4">&#9827;</div>
+
+    <div class="chips">
+        <div class="chip"></div>
+        <div class="chip"></div>
+        <div class="chip"></div>
+        <div class="chip"></div>
+        <div class="chip"></div>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Hidden YouTube player -->
+    <iframe id="ytPlayer"
+        style="position:fixed;bottom:20px;right:20px;width:280px;height:158px;opacity:0;pointer-events:none;z-index:10;border-radius:8px;border:none;"
+        src=""
+        allow="autoplay; encrypted-media"
+        allowfullscreen>
+    </iframe>
+
+    <div class="container">
+        <!-- ========== SETUP SCREEN ========== -->
+        <div id="setupScreen" class="screen active">
+            <div class="brand">
+                <div class="brand-name">Founders Poker</div>
+            </div>
+
+            <div class="setup-container">
+                <h2 class="setup-title">Tournament Setup</h2>
+
+                <!-- Players Input -->
+                <div class="setup-section">
+                    <label class="setup-label">Number of Players</label>
+                    <div class="input-row">
+                        <button class="btn-adjust" id="playersDown">−</button>
+                        <input type="number" id="playersInput" value="8" min="2" max="20">
+                        <button class="btn-adjust" id="playersUp">+</button>
+                    </div>
+                </div>
+
+                <!-- Duration Input -->
+                <div class="setup-section">
+                    <label class="setup-label">Tournament Duration</label>
+                    <div class="duration-inputs">
+                        <div class="duration-field">
+                            <input type="number" id="hoursInput" value="2" min="0" max="8">
+                            <span>hours</span>
+                        </div>
+                        <div class="duration-field">
+                            <input type="number" id="minutesInput" value="30" min="0" max="59">
+                            <span>min</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chips Selection -->
+                <div class="setup-section">
+                    <label class="setup-label">Available Chip Denominations</label>
+                    <div class="chips-grid">
+                        <label class="chip-option">
+                            <input type="checkbox" id="chip5" checked>
+                            <span class="chip-value">5</span>
+                        </label>
+                        <label class="chip-option">
+                            <input type="checkbox" id="chip25" checked>
+                            <span class="chip-value">25</span>
+                        </label>
+                        <label class="chip-option">
+                            <input type="checkbox" id="chip100" checked>
+                            <span class="chip-value">100</span>
+                        </label>
+                        <label class="chip-option">
+                            <input type="checkbox" id="chip500">
+                            <span class="chip-value">500</span>
+                        </label>
+                        <label class="chip-option">
+                            <input type="checkbox" id="chip1000">
+                            <span class="chip-value">1000</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Starting Stack -->
+                <div class="setup-section">
+                    <label class="setup-label">Starting Stack</label>
+                    <div class="input-row">
+                        <button class="btn-adjust" id="stackDown">−</button>
+                        <input type="number" id="stackInput" value="5000" min="500" max="100000" step="500">
+                        <button class="btn-adjust" id="stackUp">+</button>
+                    </div>
+                </div>
+
+                <!-- Buyin Amount -->
+                <div class="setup-section">
+                    <label class="setup-label">Buyin Amount (EUR)</label>
+                    <div class="input-row">
+                        <button class="btn-adjust" id="buyinDown">−</button>
+                        <input type="number" id="buyinInput" value="20" min="1" max="1000" step="5">
+                        <button class="btn-adjust" id="buyinUp">+</button>
+                    </div>
+                </div>
+
+                <!-- Rebuy Settings -->
+                <div class="setup-section">
+                    <label class="setup-label">Rebuy Period (Levels)</label>
+                    <div class="input-row">
+                        <button class="btn-adjust" id="rebuyLevelsDown">−</button>
+                        <input type="number" id="rebuyLevelsInput" value="3" min="0" max="10">
+                        <button class="btn-adjust" id="rebuyLevelsUp">+</button>
+                    </div>
+                    <div style="text-align: center; margin-top: 8px; font-size: 11px; color: var(--cream-dim); opacity: 0.7;">
+                        Set to 0 to disable rebuys
+                    </div>
+                </div>
+
+                <div class="setup-actions">
+                    <button class="btn-primary" id="btnCalculate">Calculate Structure</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== SUMMARY SCREEN ========== -->
+        <div id="summaryScreen" class="screen">
+            <div class="brand">
+                <div class="brand-name">Founders Poker</div>
+            </div>
+
+            <div class="summary-container">
+                <h2 class="setup-title">Tournament Structure</h2>
+
+                <div class="stack-display">
+                    <span class="stack-label">Starting Stack</span>
+                    <input type="number" id="summaryStackInput" class="stack-value" value="15000">
+                    <span class="stack-hint">chips per player</span>
+                </div>
+
+                <div class="levels-table-container">
+                    <table class="levels-table">
+                        <thead>
+                            <tr>
+                                <th>Lvl</th>
+                                <th>SB</th>
+                                <th>BB</th>
+                                <th>Ante</th>
+                                <th>Min</th>
+                            </tr>
+                        </thead>
+                        <tbody id="levelsTableBody">
+                            <!-- Generated rows -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="summary-actions">
+                    <button class="btn-secondary" id="btnBackToSetup">Back</button>
+                    <button class="btn-primary" id="btnStartTournament">Start Tournament</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== TIMER SCREEN ========== -->
+        <div id="timerScreen" class="screen">
+            <button class="btn-secondary btn-fullscreen" id="btnFullscreen">⛶</button>
+            <button class="btn-secondary btn-new-tournament" id="btnNewTournament">New</button>
+
+            <div class="brand">
+                <div class="brand-name">Founders Poker</div>
+            </div>
+
+            <div class="level-indicator" id="levelIndicator">Level 1 of 12</div>
+
+            <div class="timer-container">
+                <div class="timer" id="timer">15:00</div>
+            </div>
+
+            <div class="blinds-container">
+                <div class="blinds" id="blinds">25 <span class="blinds-divider">/</span> 50</div>
+                <div class="ante" id="ante">No Ante</div>
+            </div>
+
+            <div style="text-align: center;">
+                <div class="rebuy-info" id="rebuyInfo">
+                    <span class="label">Rebuy</span>
+                    <span class="amount">€20</span>
+                    <span class="divider">•</span>
+                    <span class="status">until L3</span>
+                </div>
+            </div>
+
+            <div class="next-level" id="nextLevel">
+                <span class="label">Next</span>50 / 100
+            </div>
+
+            <div class="controls">
+                <button class="btn-secondary btn-back" id="btnBack">Back</button>
+                <button class="btn-primary" id="btnStartPause">Start</button>
+                <button class="btn-secondary" id="btnAdvance">Next</button>
+            </div>
+
+            <div class="extra-time-container">
+                <div class="extra-time-label">Extra Time</div>
+                <div class="extra-time-buttons">
+                    <button class="btn-extra-time btn-minus" data-minutes="-1">-1 min</button>
+                    <button class="btn-extra-time" data-minutes="1">+1 min</button>
+                    <button class="btn-extra-time" data-minutes="2">+2 min</button>
+                    <button class="btn-extra-time" data-minutes="3">+3 min</button>
+                    <button class="btn-extra-time" data-minutes="5">+5 min</button>
+                </div>
+            </div>
+
+            <div class="level-selector" id="levelSelector"></div>
+        </div>
+    </div>
+
+    <script>
+        // ========== TOURNAMENT STRUCTURE (now dynamic) ==========
+        let LEVELS = [
+            { sb: 25, bb: 50, ante: 0, duration: 900 },
+        ];
+        let LEVEL_DURATION = 15 * 60;
+
+        // ========== APP STATE ==========
+        let appState = {
+            screen: 'setup',
+            config: {
+                players: 8,
+                duration: { hours: 2, minutes: 30 },
+                chips: { 5: true, 25: true, 100: true, 500: false, 1000: false },
+                startingStack: 5000,
+                buyinAmount: 20,
+                rebuyLevels: 3
+            },
+            structure: null
+        };
+
+        const HOLD_DURATION = 500;
+
+        // ========== TOURNAMENT CALCULATION ALGORITHM ==========
+        function calculateTournamentStructure(config) {
+            const { players, duration, chips, startingStack } = config;
+            const totalMinutes = duration.hours * 60 + duration.minutes;
+
+            // Get active chip denominations sorted ascending
+            const activeChips = Object.entries(chips)
+                .filter(([_, active]) => active)
+                .map(([value]) => parseInt(value))
+                .sort((a, b) => a - b);
+
+            if (activeChips.length === 0) {
+                activeChips.push(25); // fallback
+            }
+
+            const minChip = activeChips[0];
+            const totalSeconds = totalMinutes * 60;
+
+            // Calculate number of levels (target ~12-15 min per level)
+            let numLevels = Math.max(10, Math.min(25, Math.round(totalMinutes / 12)));
+
+            // Calculate duration per level
+            let levelDuration = Math.floor(totalSeconds / numLevels);
+            levelDuration = Math.max(8 * 60, Math.min(20 * 60, levelDuration));
+
+            // Recalculate number of levels
+            numLevels = Math.round(totalSeconds / levelDuration);
+            numLevels = Math.max(10, Math.min(25, numLevels));
+
+            // Generate blinds structure based on starting stack
+            const levels = generateBlindsStructure(numLevels, minChip, startingStack, levelDuration);
+
+            return {
+                startingStack,
+                levelDuration,
+                levels
+            };
+        }
+
+        function generateBlindsStructure(numLevels, minChip, startingStack, levelDuration) {
+            // Generate blind levels that scale relative to the starting stack
+            // Start with SB = minChip, go up until BB > startingStack
+            const levels = [];
+
+            // Build SB values: start from minChip, escalate progressively
+            // Target: first BB should be ~1/100 of stack, last BB should exceed stack
+            const firstSB = minChip;
+            const targetLastSB = startingStack; // SB reaches the full stack
+
+            // Generate SB values with smooth progression
+            const sbValues = [];
+            let currentSB = firstSB;
+
+            // Use a set of "nice" multipliers relative to minChip
+            // Enough levels to really kill the game
+            const rawMultipliers = [1, 2, 3, 4, 6, 8, 10, 15, 20, 30, 40, 50, 60, 80, 100,
+                                    150, 200, 300, 400, 500, 600, 800, 1000, 1500, 2000, 3000,
+                                    4000, 5000, 6000, 8000, 10000];
+
+            // Filter multipliers: only keep those that make sense for this stack
+            // Keep going until BB (2x SB) well exceeds the starting stack
+            for (const mult of rawMultipliers) {
+                const sb = minChip * mult;
+                const bb = sb * 2;
+                sbValues.push(sb);
+                if (bb >= startingStack * 2) break; // Go well past the stack
+            }
+
+            // Take numLevels evenly spaced from the available SB values
+            const totalAvailable = sbValues.length;
+            for (let i = 0; i < numLevels; i++) {
+                const idx = Math.min(Math.round(i * (totalAvailable - 1) / (numLevels - 1)), totalAvailable - 1);
+                const sb = sbValues[idx];
+                const bb = sb * 2;
+
+                levels.push({
+                    sb,
+                    bb,
+                    ante: 0,
+                    duration: levelDuration
+                });
+            }
+
+            // Deduplicate consecutive levels with same blinds
+            const deduped = [levels[0]];
+            for (let i = 1; i < levels.length; i++) {
+                if (levels[i].sb !== levels[i - 1].sb) {
+                    deduped.push(levels[i]);
+                }
+            }
+
+            return deduped;
+        }
+
+        // ========== SCREEN NAVIGATION ==========
+        async function showScreen(screenName) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenName + 'Screen').classList.add('active');
+            appState.screen = screenName;
+
+            // Request wake lock when entering timer screen
+            if (screenName === 'timer') {
+                await requestWakeLock();
+            } else {
+                // Release wake lock when leaving timer screen
+                await releaseWakeLock();
+            }
+        }
+
+        function getSelectedChips() {
+            return {
+                5: document.getElementById('chip5').checked,
+                25: document.getElementById('chip25').checked,
+                100: document.getElementById('chip100').checked,
+                500: document.getElementById('chip500').checked,
+                1000: document.getElementById('chip1000').checked
+            };
+        }
+
+        function renderSummary() {
+            const { structure } = appState;
+
+            // Stack
+            document.getElementById('summaryStackInput').value = structure.startingStack;
+
+            // Levels table
+            const tbody = document.getElementById('levelsTableBody');
+            tbody.innerHTML = structure.levels.map((level, i) => `
+                <tr data-level="${i}">
+                    <td class="level-num">${i + 1}</td>
+                    <td><input type="number" class="level-sb" value="${level.sb}" min="0"></td>
+                    <td><input type="number" class="level-bb" value="${level.bb}" min="0"></td>
+                    <td><input type="number" class="level-ante" value="${level.ante}" min="0"></td>
+                    <td><input type="number" class="level-duration" value="${Math.floor(level.duration / 60)}" min="1"></td>
+                </tr>
+            `).join('');
+        }
+
+        function initSetupHandlers() {
+            // Players +/- buttons
+            document.getElementById('playersUp').addEventListener('click', () => {
+                const input = document.getElementById('playersInput');
+                input.value = Math.min(20, parseInt(input.value || 0) + 1);
+            });
+
+            document.getElementById('playersDown').addEventListener('click', () => {
+                const input = document.getElementById('playersInput');
+                input.value = Math.max(2, parseInt(input.value || 0) - 1);
+            });
+
+            // Starting Stack +/- buttons
+            document.getElementById('stackUp').addEventListener('click', () => {
+                const input = document.getElementById('stackInput');
+                input.value = Math.min(100000, parseInt(input.value || 0) + 500);
+            });
+
+            document.getElementById('stackDown').addEventListener('click', () => {
+                const input = document.getElementById('stackInput');
+                input.value = Math.max(500, parseInt(input.value || 0) - 500);
+            });
+
+            // Buyin +/- buttons
+            document.getElementById('buyinUp').addEventListener('click', () => {
+                const input = document.getElementById('buyinInput');
+                input.value = Math.min(1000, parseInt(input.value || 0) + 5);
+            });
+
+            document.getElementById('buyinDown').addEventListener('click', () => {
+                const input = document.getElementById('buyinInput');
+                input.value = Math.max(1, parseInt(input.value || 0) - 5);
+            });
+
+            // Rebuy levels +/- buttons
+            document.getElementById('rebuyLevelsUp').addEventListener('click', () => {
+                const input = document.getElementById('rebuyLevelsInput');
+                input.value = Math.min(10, parseInt(input.value || 0) + 1);
+            });
+
+            document.getElementById('rebuyLevelsDown').addEventListener('click', () => {
+                const input = document.getElementById('rebuyLevelsInput');
+                input.value = Math.max(0, parseInt(input.value || 0) - 1);
+            });
+
+            // Calculate button
+            const btnCalculate = document.getElementById('btnCalculate');
+            const handleCalculate = () => {
+                const chips = getSelectedChips();
+
+                // Validate at least one chip selected
+                if (!Object.values(chips).some(v => v)) {
+                    alert('Select at least one chip denomination');
+                    return;
+                }
+
+                const hours = parseInt(document.getElementById('hoursInput').value) || 0;
+                const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
+
+                if (hours === 0 && minutes === 0) {
+                    alert('Please enter a tournament duration');
+                    return;
+                }
+
+                const startingStack = parseInt(document.getElementById('stackInput').value) || 5000;
+                const buyinAmount = parseInt(document.getElementById('buyinInput').value) || 20;
+                const rebuyLevels = parseInt(document.getElementById('rebuyLevelsInput').value) || 0;
+
+                // Validate buyin amount
+                if (buyinAmount < 1) {
+                    alert('Buyin amount must be at least €1');
+                    return;
+                }
+
+                // Gather config
+                appState.config = {
+                    players: parseInt(document.getElementById('playersInput').value) || 8,
+                    duration: { hours, minutes },
+                    chips,
+                    startingStack,
+                    buyinAmount,
+                    rebuyLevels
+                };
+
+                // Calculate structure
+                appState.structure = calculateTournamentStructure(appState.config);
+
+                // Validate rebuy levels against calculated structure
+                if (rebuyLevels > appState.structure.levels.length) {
+                    alert(`Rebuy period (${rebuyLevels} levels) exceeds tournament length (${appState.structure.levels.length} levels). Setting rebuy period to maximum available.`);
+                    appState.config.rebuyLevels = appState.structure.levels.length;
+                    document.getElementById('rebuyLevelsInput').value = appState.structure.levels.length;
+                }
+
+                // Show summary
+                renderSummary();
+                showScreen('summary');
+            };
+            btnCalculate.addEventListener('click', handleCalculate);
+            btnCalculate.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                handleCalculate();
+            });
+        }
+
+        function initSummaryHandlers() {
+            const btnBack = document.getElementById('btnBackToSetup');
+            const btnStart = document.getElementById('btnStartTournament');
+
+            const goBack = () => showScreen('setup');
+            btnBack.addEventListener('click', goBack);
+            btnBack.addEventListener('touchend', (e) => { e.preventDefault(); goBack(); });
+
+            const startTournament = () => {
+                // Gather edited values
+                const stack = parseInt(document.getElementById('summaryStackInput').value) || 10000;
+                const rows = document.querySelectorAll('#levelsTableBody tr');
+                const levels = [];
+
+                rows.forEach(row => {
+                    const sb = parseInt(row.querySelector('.level-sb').value) || 0;
+                    const bb = parseInt(row.querySelector('.level-bb').value) || 0;
+                    const ante = parseInt(row.querySelector('.level-ante').value) || 0;
+                    const duration = (parseInt(row.querySelector('.level-duration').value) || 15) * 60;
+
+                    if (sb > 0 && bb > 0) {
+                        levels.push({ sb, bb, ante, duration });
+                    }
+                });
+
+                if (levels.length === 0) {
+                    alert('Please configure at least one level');
+                    return;
+                }
+
+                // Update global state
+                appState.structure.startingStack = stack;
+                appState.structure.levels = levels;
+                LEVELS = levels;
+                LEVEL_DURATION = levels[0].duration;
+
+                // Reset timer state
+                currentLevel = 0;
+                timeRemaining = levels[0].duration;
+                isRunning = false;
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+                stopSong();
+
+                // Regenerate level selector and update display
+                createLevelSelector();
+                updateDisplay();
+
+                showScreen('timer');
+            };
+            btnStart.addEventListener('click', startTournament);
+            btnStart.addEventListener('touchend', (e) => { e.preventDefault(); startTournament(); });
+        }
+
+        function initTimerScreenHandlers() {
+            const btnNew = document.getElementById('btnNewTournament');
+            const newTournament = () => {
+                if (isRunning) {
+                    if (!confirm('Timer is running. Start a new tournament?')) return;
+                    toggleTimer();
+                }
+                showScreen('setup');
+            };
+            btnNew.addEventListener('click', newTournament);
+            btnNew.addEventListener('touchend', (e) => { e.preventDefault(); newTournament(); });
+
+            // Fullscreen toggle
+            const btnFullscreen = document.getElementById('btnFullscreen');
+            const toggleFullscreen = async () => {
+                try {
+                    if (!document.fullscreenElement) {
+                        await document.documentElement.requestFullscreen();
+                        btnFullscreen.textContent = '⛶';
+                    } else {
+                        await document.exitFullscreen();
+                        btnFullscreen.textContent = '⛶';
+                    }
+                } catch (err) {
+                    console.log('Fullscreen error:', err);
+                }
+            };
+            btnFullscreen.addEventListener('click', toggleFullscreen);
+            btnFullscreen.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                toggleFullscreen();
+            });
+        }
+
+        let currentLevel = 0;
+        let timeRemaining = LEVEL_DURATION;
+        let isRunning = false;
+        let timerInterval = null;
+        let holdTimeout = null;
+        let audioCtx = null;
+        let songPlaying = false;
+        const SONG_DURATION = 180; // 3 minutes
+        let wakeLock = null;
+
+        const timerEl = document.getElementById('timer');
+        const blindsEl = document.getElementById('blinds');
+        const anteEl = document.getElementById('ante');
+        const rebuyInfoEl = document.getElementById('rebuyInfo');
+        const nextLevelEl = document.getElementById('nextLevel');
+        const levelIndicatorEl = document.getElementById('levelIndicator');
+        const btnStartPause = document.getElementById('btnStartPause');
+        const btnAdvance = document.getElementById('btnAdvance');
+        const btnBack = document.getElementById('btnBack');
+        const levelSelectorEl = document.getElementById('levelSelector');
+        const progressBarEl = document.getElementById('progressBar');
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Screen Wake Lock - prevent screen from sleeping
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Wake Lock active');
+
+                    wakeLock.addEventListener('release', () => {
+                        console.log('Wake Lock released');
+                    });
+                }
+            } catch (err) {
+                console.log('Wake Lock error:', err);
+            }
+        }
+
+        async function releaseWakeLock() {
+            if (wakeLock !== null) {
+                try {
+                    await wakeLock.release();
+                    wakeLock = null;
+                } catch (err) {
+                    console.log('Wake Lock release error:', err);
+                }
+            }
+        }
+
+        // Re-request wake lock when page becomes visible again
+        document.addEventListener('visibilitychange', async () => {
+            if (wakeLock !== null && document.visibilityState === 'visible' && appState.screen === 'timer') {
+                await requestWakeLock();
+            }
+        });
+
+        // YouTube player (simple iframe approach)
+        const ytPlayerEl = document.getElementById('ytPlayer');
+
+        function playSong() {
+            if (!songPlaying) {
+                ytPlayerEl.src = 'https://www.youtube.com/embed/Gj9holHsi90?autoplay=1&start=0';
+                ytPlayerEl.style.opacity = '0.2';
+                songPlaying = true;
+            }
+        }
+
+        function stopSong() {
+            if (songPlaying) {
+                ytPlayerEl.src = '';
+                ytPlayerEl.style.opacity = '0';
+                songPlaying = false;
+            }
+        }
+
+        function playSound(frequency, duration, volume = 0.3) {
+            if (!audioCtx) return;
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + duration);
+        }
+
+        function playWarningSound() {
+            playSound(523.25, 0.15, 0.15); // C5
+            setTimeout(() => playSound(659.25, 0.2, 0.15), 150); // E5
+        }
+
+        function playCriticalSound() {
+            playSound(440, 0.12, 0.25); // A4
+        }
+
+        function playLevelChangeSound() {
+            playSound(523.25, 0.1, 0.3); // C5
+            setTimeout(() => playSound(659.25, 0.1, 0.3), 100); // E5
+            setTimeout(() => playSound(783.99, 0.2, 0.3), 200); // G5
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateDisplay() {
+            const level = LEVELS[currentLevel];
+            const nextLevel = LEVELS[currentLevel + 1];
+
+            timerEl.textContent = formatTime(timeRemaining);
+            timerEl.classList.toggle('paused', !isRunning);
+            timerEl.classList.toggle('warning', timeRemaining <= 60 && timeRemaining > 10);
+            timerEl.classList.toggle('critical', timeRemaining <= 10);
+
+            blindsEl.innerHTML = `${level.sb} <span class="blinds-divider">/</span> ${level.bb}`;
+
+            if (level.ante > 0) {
+                anteEl.innerHTML = `Ante <span class="value">${level.ante}</span>`;
+            } else {
+                anteEl.textContent = 'No Ante';
+            }
+
+            if (nextLevel) {
+                const anteText = nextLevel.ante > 0 ? ` (Ante ${nextLevel.ante})` : '';
+                nextLevelEl.innerHTML = `<span class="label">Next</span>${nextLevel.sb} / ${nextLevel.bb}${anteText}`;
+            } else {
+                nextLevelEl.innerHTML = `<span class="label">Final Level</span>`;
+            }
+
+            levelIndicatorEl.textContent = `Level ${currentLevel + 1} of ${LEVELS.length}`;
+
+            // Update rebuy info
+            const { buyinAmount, rebuyLevels } = appState.config;
+            if (rebuyLevels > 0) {
+                const rebuyAvailable = currentLevel < rebuyLevels;
+                rebuyInfoEl.classList.toggle('available', rebuyAvailable);
+                rebuyInfoEl.classList.toggle('unavailable', !rebuyAvailable);
+
+                const statusText = rebuyAvailable
+                    ? `until L${rebuyLevels}`
+                    : 'closed';
+
+                rebuyInfoEl.innerHTML = `
+                    <span class="label">Rebuy</span>
+                    <span class="amount">€${buyinAmount}</span>
+                    <span class="divider">•</span>
+                    <span class="status">${statusText}</span>
+                `;
+                rebuyInfoEl.style.display = 'inline-flex';
+            } else {
+                rebuyInfoEl.style.display = 'none';
+            }
+
+            const currentDuration = level.duration || LEVEL_DURATION;
+            const progress = ((currentDuration - timeRemaining) / currentDuration) * 100;
+            progressBarEl.style.width = `${progress}%`;
+            progressBarEl.classList.toggle('warning', timeRemaining <= 60 && timeRemaining > 10);
+            progressBarEl.classList.toggle('critical', timeRemaining <= 10);
+
+            btnStartPause.textContent = isRunning ? 'Pause' : 'Start';
+            btnStartPause.classList.toggle('running', isRunning);
+
+            updateLevelSelector();
+        }
+
+        function createLevelSelector() {
+            levelSelectorEl.innerHTML = '';
+            LEVELS.forEach((level, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'level-btn';
+                btn.textContent = index + 1;
+                btn.addEventListener('click', () => jumpToLevel(index));
+                levelSelectorEl.appendChild(btn);
+            });
+        }
+
+        function updateLevelSelector() {
+            const buttons = levelSelectorEl.querySelectorAll('.level-btn');
+            buttons.forEach((btn, index) => {
+                btn.classList.toggle('active', index === currentLevel);
+                btn.classList.toggle('completed', index < currentLevel);
+            });
+        }
+
+        function jumpToLevel(levelIndex) {
+            initAudio();
+            stopSong();
+            currentLevel = levelIndex;
+            timeRemaining = LEVELS[currentLevel].duration || LEVEL_DURATION;
+            updateDisplay();
+        }
+
+        function advanceLevel() {
+            initAudio();
+            stopSong();
+            if (currentLevel < LEVELS.length - 1) {
+                currentLevel++;
+                timeRemaining = LEVELS[currentLevel].duration || LEVEL_DURATION;
+                playLevelChangeSound();
+                if (navigator.vibrate) {
+                    navigator.vibrate([100, 50, 100]);
+                }
+            }
+            updateDisplay();
+        }
+
+        function goBackLevel() {
+            initAudio();
+            stopSong();
+            if (currentLevel > 0) {
+                currentLevel--;
+                timeRemaining = LEVELS[currentLevel].duration || LEVEL_DURATION;
+            }
+            updateDisplay();
+        }
+
+        function toggleTimer() {
+            initAudio();
+            isRunning = !isRunning;
+            if (isRunning) {
+                timerInterval = setInterval(tick, 1000);
+            } else {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                stopSong();
+            }
+            updateDisplay();
+        }
+
+        function addExtraTime(minutes) {
+            initAudio();
+            timeRemaining += minutes * 60;
+            playSound(659.25, 0.15, 0.2); // E5 - confirmation sound
+            updateDisplay();
+        }
+
+        function tick() {
+            if (timeRemaining > 0) {
+                timeRemaining--;
+                if (timeRemaining === 600) { // 10 minutes
+                    playWarningSound();
+                } else if (timeRemaining === 300) { // 5 minutes
+                    playWarningSound();
+                } else if (timeRemaining === SONG_DURATION) { // 3 minutes - start song
+                    playSong();
+                } else if (timeRemaining === 60) { // 1 minute
+                    playWarningSound();
+                } else if (timeRemaining === 10) {
+                    playCriticalSound();
+                } else if (timeRemaining <= 5 && timeRemaining > 0) {
+                    playCriticalSound();
+                }
+                updateDisplay();
+            } else {
+                advanceLevel();
+            }
+        }
+
+        // Simple click/tap to start/pause
+        btnStartPause.addEventListener('click', toggleTimer);
+        btnStartPause.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            toggleTimer();
+        });
+
+        btnAdvance.addEventListener('click', advanceLevel);
+        btnAdvance.addEventListener('touchend', (e) => { e.preventDefault(); advanceLevel(); });
+        btnBack.addEventListener('click', goBackLevel);
+        btnBack.addEventListener('touchend', (e) => { e.preventDefault(); goBackLevel(); });
+
+        // Extra time buttons
+        document.querySelectorAll('.btn-extra-time').forEach(btn => {
+            const handleExtraTime = () => {
+                const minutes = parseInt(btn.dataset.minutes);
+                addExtraTime(minutes);
+            };
+            btn.addEventListener('click', handleExtraTime);
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                handleExtraTime();
+            });
+        });
+
+        document.addEventListener('keydown', (e) => {
+            // Only handle shortcuts when in timer screen
+            if (appState.screen !== 'timer') return;
+
+            if (e.code === 'Space') {
+                e.preventDefault();
+                toggleTimer();
+            } else if (e.code === 'ArrowRight') {
+                advanceLevel();
+            } else if (e.code === 'ArrowLeft') {
+                goBackLevel();
+            } else if (e.key >= '1' && e.key <= '9') {
+                const level = parseInt(e.key) - 1;
+                if (level < LEVELS.length) {
+                    jumpToLevel(level);
+                }
+            } else if (e.key === '0') {
+                jumpToLevel(9);
+            }
+        });
+
+        document.addEventListener('contextmenu', (e) => {
+            if (e.target === btnStartPause) {
+                e.preventDefault();
+            }
+        });
+
+        // Initialize app
+        initSetupHandlers();
+        initSummaryHandlers();
+        initTimerScreenHandlers();
+        // Start with setup screen (already set as active in HTML)
+    </script>
+</body>
+</html>
