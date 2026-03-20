@@ -871,52 +871,179 @@
             z-index: 100;
         }
 
-        /* Radiooooo button */
-        .radio-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 52px;
-            height: 52px;
+        /* Radio player */
+        .radio-container {
+            display: none;
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+
+        .radio-container.visible {
+            display: block;
+        }
+
+        .radio-player {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(212, 168, 75, 0.2);
+            border-radius: 10px;
+            padding: 14px 18px;
+            max-width: 340px;
+            margin: 0 auto;
+        }
+
+        .radio-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .radio-title {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--gold);
+            opacity: 0.7;
+        }
+
+        .radio-powered {
+            font-size: 9px;
+            color: var(--cream-dim);
+            opacity: 0.4;
+            letter-spacing: 0.05em;
+        }
+
+        .radio-stations {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .radio-station {
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 500;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(212, 168, 75, 0.15);
+            border-radius: 20px;
+            color: var(--cream-dim);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            letter-spacing: 0.03em;
+        }
+
+        .radio-station:hover {
+            border-color: rgba(212, 168, 75, 0.4);
+            color: var(--cream);
+            background: rgba(212, 168, 75, 0.08);
+        }
+
+        .radio-station.active {
+            background: linear-gradient(180deg, rgba(212, 168, 75, 0.25), rgba(212, 168, 75, 0.1));
+            border-color: var(--gold);
+            color: var(--gold-light);
+            box-shadow: 0 0 12px rgba(212, 168, 75, 0.15);
+        }
+
+        .radio-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .radio-play-btn {
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             background: linear-gradient(180deg, var(--gold-light), var(--gold-dark));
-            border: 2px solid var(--gold);
+            border: 1px solid var(--gold);
             color: var(--black-deep);
-            font-size: 22px;
-            display: none;
+            font-size: 14px;
+            display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 200;
-            box-shadow: 0 4px 20px rgba(212, 168, 75, 0.4);
-            transition: all 0.3s ease;
             padding: 0;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
         }
 
-        .radio-btn.visible {
-            display: flex;
+        .radio-play-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2px 12px rgba(212, 168, 75, 0.4);
         }
 
-        .radio-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 28px rgba(212, 168, 75, 0.6);
-        }
-
-        .radio-btn.active {
+        .radio-play-btn.playing {
             background: linear-gradient(180deg, var(--felt-light), var(--felt));
             border-color: var(--felt-light);
-            color: var(--gold);
-            box-shadow: 0 4px 20px rgba(17, 122, 74, 0.4);
+            color: var(--cream);
         }
 
-        @media (max-width: 600px) {
-            .radio-btn {
-                bottom: 14px;
-                right: 14px;
-                width: 46px;
-                height: 46px;
-                font-size: 20px;
-            }
+        .radio-now-playing {
+            font-size: 12px;
+            color: var(--cream-dim);
+            flex: 1;
+            min-width: 0;
+            line-height: 1.3;
+        }
+
+        .radio-station-name {
+            color: var(--gold);
+            font-weight: 500;
+            font-size: 11px;
+            letter-spacing: 0.05em;
+        }
+
+        .radio-station-desc {
+            font-size: 10px;
+            opacity: 0.6;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .radio-volume {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .radio-volume-icon {
+            font-size: 12px;
+            color: var(--cream-dim);
+            opacity: 0.5;
+            cursor: pointer;
+        }
+
+        .radio-volume-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 60px;
+            height: 3px;
+            background: rgba(212, 168, 75, 0.2);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        .radio-volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--gold);
+            cursor: pointer;
+        }
+
+        .radio-volume-slider::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--gold);
+            cursor: pointer;
+            border: none;
         }
 
         @media (max-width: 600px) {
@@ -971,8 +1098,6 @@
         allowfullscreen>
     </iframe>
 
-    <!-- Radiooooo button -->
-    <button class="radio-btn" id="radioBtn" title="Radiooooo">&#9835;</button>
 
     <div class="container">
         <!-- ========== SETUP SCREEN ========== -->
@@ -1176,6 +1301,28 @@
             </div>
 
             <div class="level-selector" id="levelSelector"></div>
+
+            <!-- Embedded Radio Player -->
+            <div class="radio-container visible" id="radioContainer">
+                <div class="radio-player">
+                    <div class="radio-header">
+                        <span class="radio-title">Radio</span>
+                        <span class="radio-powered">SomaFM</span>
+                    </div>
+                    <div class="radio-stations" id="radioStations"></div>
+                    <div class="radio-controls">
+                        <button class="radio-play-btn" id="radioPlayBtn">&#9654;</button>
+                        <div class="radio-now-playing" id="radioNowPlaying">
+                            <div class="radio-station-name">Select a station</div>
+                            <div class="radio-station-desc">curated internet radio</div>
+                        </div>
+                        <div class="radio-volume">
+                            <span class="radio-volume-icon" id="radioMuteBtn">&#128266;</span>
+                            <input type="range" class="radio-volume-slider" id="radioVolume" min="0" max="100" value="50">
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1298,9 +1445,6 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenName + 'Screen').classList.add('active');
             appState.screen = screenName;
-
-            // Show radio button only on timer screen
-            document.getElementById('radioBtn').classList.toggle('visible', screenName === 'timer');
 
             // Request wake lock when entering timer screen
             if (screenName === 'timer') {
@@ -1919,26 +2063,96 @@
             return true;
         }
 
-        // ========== RADIOOOOO INTEGRATION ==========
-        let radioPopupWindow = null;
-        const radioBtnEl = document.getElementById('radioBtn');
+        // ========== RADIO PLAYER ==========
+        const RADIO_STATIONS = [
+            { id: 'secretagent', name: 'Secret Agent', desc: 'Bond-style spy music', url: 'https://ice2.somafm.com/secretagent-128-mp3' },
+            { id: 'groovesalad', name: 'Groove Salad', desc: 'Ambient downtempo beats', url: 'https://ice2.somafm.com/groovesalad-128-mp3' },
+            { id: 'lounge', name: 'Illinois Street Lounge', desc: 'Exotica & lounge', url: 'https://ice2.somafm.com/illstreet-128-mp3' },
+            { id: 'jazz', name: 'Sonic Universe', desc: 'Jazz in all its forms', url: 'https://ice2.somafm.com/sonicuniverse-128-mp3' },
+            { id: 'seventies', name: 'Seven Inch Soul', desc: '60s & 70s soul', url: 'https://ice2.somafm.com/7soul-128-mp3' },
+            { id: 'u80s', name: 'Underground 80s', desc: 'UK Synthpop & New Wave', url: 'https://ice2.somafm.com/u80s-128-mp3' },
+            { id: 'lush', name: 'Lush', desc: 'Mellow female vocals', url: 'https://ice2.somafm.com/lush-128-mp3' },
+        ];
 
-        radioBtnEl.addEventListener('click', () => {
-            if (radioPopupWindow && !radioPopupWindow.closed) {
-                radioPopupWindow.focus();
+        let radioAudio = new Audio();
+        let radioPlaying = false;
+        let currentStation = null;
+        radioAudio.volume = 0.5;
+
+        const radioStationsEl = document.getElementById('radioStations');
+        const radioPlayBtn = document.getElementById('radioPlayBtn');
+        const radioNowPlaying = document.getElementById('radioNowPlaying');
+        const radioVolumeSlider = document.getElementById('radioVolume');
+        const radioMuteBtn = document.getElementById('radioMuteBtn');
+
+        // Build station buttons
+        RADIO_STATIONS.forEach(station => {
+            const btn = document.createElement('button');
+            btn.className = 'radio-station';
+            btn.textContent = station.name;
+            btn.dataset.id = station.id;
+            btn.addEventListener('click', () => selectStation(station));
+            radioStationsEl.appendChild(btn);
+        });
+
+        function selectStation(station) {
+            currentStation = station;
+
+            // Update active button
+            radioStationsEl.querySelectorAll('.radio-station').forEach(b => {
+                b.classList.toggle('active', b.dataset.id === station.id);
+            });
+
+            // Update now playing text
+            radioNowPlaying.innerHTML = `
+                <div class="radio-station-name">${station.name}</div>
+                <div class="radio-station-desc">${station.desc}</div>
+            `;
+
+            // Play the station
+            radioAudio.src = station.url;
+            radioAudio.play().catch(() => {});
+            radioPlaying = true;
+            radioPlayBtn.innerHTML = '&#9646;&#9646;';
+            radioPlayBtn.classList.add('playing');
+        }
+
+        radioPlayBtn.addEventListener('click', () => {
+            if (!currentStation) {
+                selectStation(RADIO_STATIONS[0]);
+                return;
+            }
+            if (radioPlaying) {
+                radioAudio.pause();
+                radioPlaying = false;
+                radioPlayBtn.innerHTML = '&#9654;';
+                radioPlayBtn.classList.remove('playing');
             } else {
-                radioPopupWindow = window.open('https://app.radiooooo.com/', 'radiooooo', 'width=420,height=620');
-                radioBtnEl.classList.add('active');
+                radioAudio.play().catch(() => {});
+                radioPlaying = true;
+                radioPlayBtn.innerHTML = '&#9646;&#9646;';
+                radioPlayBtn.classList.add('playing');
             }
         });
 
-        // Check if popup was closed to update button state
-        setInterval(() => {
-            if (radioPopupWindow && radioPopupWindow.closed) {
-                radioBtnEl.classList.remove('active');
-                radioPopupWindow = null;
+        radioVolumeSlider.addEventListener('input', (e) => {
+            radioAudio.volume = e.target.value / 100;
+            radioMuteBtn.innerHTML = radioAudio.volume === 0 ? '&#128264;' : '&#128266;';
+        });
+
+        let savedVolume = 0.5;
+        radioMuteBtn.addEventListener('click', () => {
+            if (radioAudio.volume > 0) {
+                savedVolume = radioAudio.volume;
+                radioAudio.volume = 0;
+                radioVolumeSlider.value = 0;
+                radioMuteBtn.innerHTML = '&#128264;';
+            } else {
+                radioAudio.volume = savedVolume;
+                radioVolumeSlider.value = savedVolume * 100;
+                radioMuteBtn.innerHTML = '&#128266;';
             }
-        }, 1000);
+        });
 
         // Initialize app
         initSetupHandlers();
