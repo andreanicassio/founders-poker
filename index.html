@@ -621,7 +621,7 @@
         /* ========== SETUP SCREEN ========== */
         .setup-container {
             padding: 20px;
-            max-width: 500px;
+            max-width: 520px;
             margin: 0 auto;
         }
 
@@ -630,23 +630,97 @@
             font-size: clamp(24px, 5vw, 32px);
             text-align: center;
             color: var(--gold);
-            margin-bottom: 36px;
+            margin-bottom: 24px;
             letter-spacing: 0.05em;
         }
 
+        /* Presets */
+        .preset-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 28px;
+            justify-content: center;
+        }
+
+        .preset-btn {
+            flex: 1;
+            max-width: 150px;
+            padding: 10px 8px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(212, 168, 75, 0.2);
+            border-radius: 8px;
+            color: var(--cream-dim);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: center;
+        }
+
+        .preset-btn:hover {
+            border-color: rgba(212, 168, 75, 0.5);
+            color: var(--cream);
+            background: rgba(212, 168, 75, 0.08);
+        }
+
+        .preset-btn.active {
+            background: linear-gradient(180deg, rgba(212, 168, 75, 0.2), rgba(212, 168, 75, 0.08));
+            border-color: var(--gold);
+            color: var(--gold-light);
+            box-shadow: 0 0 16px rgba(212, 168, 75, 0.15);
+        }
+
+        .preset-btn .preset-name {
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .preset-btn .preset-detail {
+            display: block;
+            font-size: 9px;
+            font-weight: 400;
+            letter-spacing: 0.03em;
+            text-transform: none;
+            opacity: 0.6;
+        }
+
+        /* Setup cards */
+        .setup-card {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(212, 168, 75, 0.12);
+            border-radius: 12px;
+            padding: 22px 20px 18px;
+            margin-bottom: 16px;
+        }
+
+        .setup-card-title {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--gold);
+            opacity: 0.6;
+            margin-bottom: 18px;
+        }
+
+        .setup-card .setup-section:last-child {
+            margin-bottom: 0;
+        }
+
         .setup-section {
-            margin-bottom: 32px;
+            margin-bottom: 22px;
         }
 
         .setup-label {
             display: block;
             font-size: 11px;
             font-weight: 500;
-            letter-spacing: 0.15em;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
-            color: var(--gold);
-            opacity: 0.8;
-            margin-bottom: 14px;
+            color: var(--cream-dim);
+            margin-bottom: 12px;
             text-align: center;
         }
 
@@ -654,17 +728,17 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 16px;
+            gap: 14px;
         }
 
         .btn-adjust {
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 300;
             background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(212, 168, 75, 0.3);
+            border: 1px solid rgba(212, 168, 75, 0.25);
             color: var(--gold);
             display: flex;
             align-items: center;
@@ -678,22 +752,23 @@
         }
 
         .btn-adjust-sm {
-            width: 36px;
-            height: 36px;
-            font-size: 18px;
+            width: 34px;
+            height: 34px;
+            font-size: 16px;
         }
 
         .setup-section input[type="number"] {
-            width: 90px;
-            height: 56px;
+            width: 88px;
+            height: 52px;
             text-align: center;
             font-family: 'Playfair Display', Georgia, serif;
-            font-size: 28px;
+            font-size: 26px;
             background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(212, 168, 75, 0.3);
+            border: 1px solid rgba(212, 168, 75, 0.25);
             border-radius: 8px;
             color: var(--cream);
             -moz-appearance: textfield;
+            transition: border-color 0.3s ease;
         }
 
         .setup-section input[type="number"]::-webkit-outer-spin-button,
@@ -710,7 +785,7 @@
         .duration-inputs {
             display: flex;
             justify-content: center;
-            gap: 32px;
+            gap: 28px;
         }
 
         .duration-field {
@@ -719,29 +794,30 @@
             flex-wrap: wrap;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .duration-field input {
-            width: 70px !important;
-            height: 50px !important;
-            font-size: 24px !important;
+            width: 60px !important;
+            height: 46px !important;
+            font-size: 22px !important;
         }
 
         .duration-field span {
-            font-size: 11px;
+            font-size: 10px;
             letter-spacing: 0.1em;
             text-transform: uppercase;
             color: var(--cream-dim);
+            opacity: 0.6;
             width: 100%;
             text-align: center;
         }
 
-        /* Chips Selection */
+        /* Poker chip selection with real chip colors */
         .chips-grid {
             display: flex;
             justify-content: center;
-            gap: 16px;
+            gap: 14px;
             flex-wrap: wrap;
         }
 
@@ -760,32 +836,152 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 64px;
-            height: 64px;
+            width: 62px;
+            height: 62px;
             border-radius: 50%;
-            background: rgba(0, 0, 0, 0.3);
-            border: 2px solid rgba(212, 168, 75, 0.2);
+            background: rgba(0, 0, 0, 0.35);
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            outline: 2px dashed transparent;
+            outline-offset: -8px;
             font-family: 'Playfair Display', Georgia, serif;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
-            color: var(--cream-dim);
-            transition: all 0.2s ease;
+            color: rgba(255, 255, 255, 0.35);
+            transition: all 0.25s ease;
+            opacity: 0.5;
         }
 
         .chip-option:hover .chip-value {
-            border-color: rgba(212, 168, 75, 0.5);
-            background: rgba(212, 168, 75, 0.1);
+            opacity: 0.8;
+            transform: translateY(-2px);
+        }
+
+        /* Poker chip colors */
+        .chip-option[data-chip="5"] .chip-value { border-color: rgba(196, 30, 58, 0.3); }
+        .chip-option[data-chip="25"] .chip-value { border-color: rgba(17, 122, 74, 0.3); }
+        .chip-option[data-chip="100"] .chip-value { border-color: rgba(40, 40, 40, 0.4); }
+        .chip-option[data-chip="500"] .chip-value { border-color: rgba(106, 13, 173, 0.3); }
+        .chip-option[data-chip="1000"] .chip-value { border-color: rgba(230, 138, 0, 0.3); }
+
+        .chip-option[data-chip="5"] input:checked + .chip-value {
+            background: linear-gradient(145deg, #d42a47, #a01830);
+            border-color: #e84a64;
+            outline: 2px dashed rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        .chip-option[data-chip="25"] input:checked + .chip-value {
+            background: linear-gradient(145deg, #15915a, #0a6038);
+            border-color: #1db872;
+            outline: 2px dashed rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        .chip-option[data-chip="100"] input:checked + .chip-value {
+            background: linear-gradient(145deg, #2a2a2a, #111);
+            border-color: #555;
+            outline: 2px dashed rgba(255, 255, 255, 0.25);
+            color: white;
+        }
+        .chip-option[data-chip="500"] input:checked + .chip-value {
+            background: linear-gradient(145deg, #7b1fa2, #4a148c);
+            border-color: #ab47bc;
+            outline: 2px dashed rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        .chip-option[data-chip="1000"] input:checked + .chip-value {
+            background: linear-gradient(145deg, #e68a00, #b36b00);
+            border-color: #ffb133;
+            outline: 2px dashed rgba(255, 255, 255, 0.3);
+            color: white;
         }
 
         .chip-option input:checked + .chip-value {
-            background: linear-gradient(180deg, var(--gold-light), var(--gold-dark));
+            opacity: 1;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Share bar */
+        .share-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            margin-bottom: 20px;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(212, 168, 75, 0.1);
+            border-radius: 8px;
+        }
+
+        .share-bar-icon {
+            font-size: 14px;
+            color: var(--gold);
+            opacity: 0.5;
+            flex-shrink: 0;
+        }
+
+        .share-url-preview {
+            flex: 1;
+            min-width: 0;
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-size: 10px;
+            color: var(--cream-dim);
+            opacity: 0.5;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            background: none;
+            border: none;
+            outline: none;
+            cursor: text;
+        }
+
+        .share-copy-btn {
+            padding: 6px 12px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            background: rgba(212, 168, 75, 0.1);
+            border: 1px solid rgba(212, 168, 75, 0.25);
+            border-radius: 6px;
+            color: var(--gold);
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .share-copy-btn:hover {
+            background: rgba(212, 168, 75, 0.2);
             border-color: var(--gold);
-            color: var(--black-deep);
-            box-shadow: 0 4px 16px rgba(212, 168, 75, 0.35);
+        }
+
+        .share-loaded-msg {
+            font-size: 11px;
+            color: var(--gold);
+            text-align: center;
+            margin-bottom: 16px;
+            opacity: 0.7;
+            letter-spacing: 0.05em;
+            animation: fadeInMsg 0.5s ease;
+        }
+
+        @keyframes fadeInMsg {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 0.7; transform: translateY(0); }
+        }
+
+        @keyframes url-loaded-pulse {
+            0% { border-color: var(--gold); box-shadow: 0 0 12px rgba(212, 168, 75, 0.3); }
+            100% { border-color: rgba(212, 168, 75, 0.25); box-shadow: none; }
+        }
+
+        .setup-card.url-loaded {
+            animation: url-loaded-pulse 1.5s ease forwards;
         }
 
         .setup-actions {
-            margin-top: 40px;
+            margin-top: 24px;
             text-align: center;
         }
 
@@ -1114,13 +1310,26 @@
         @media (max-width: 600px) {
             .setup-container,
             .summary-container {
-                padding: 16px;
+                padding: 12px;
+            }
+
+            .setup-card {
+                padding: 18px 14px 14px;
+            }
+
+            .preset-bar {
+                gap: 8px;
+            }
+
+            .preset-btn {
+                padding: 8px 6px;
+                font-size: 11px;
             }
 
             .chip-value {
-                width: 56px;
-                height: 56px;
-                font-size: 16px;
+                width: 54px;
+                height: 54px;
+                font-size: 14px;
             }
 
             .levels-table input {
@@ -1132,6 +1341,14 @@
             .stack-value {
                 font-size: 36px;
                 width: 150px;
+            }
+
+            .share-bar {
+                padding: 6px 8px;
+            }
+
+            .share-url-preview {
+                font-size: 9px;
             }
         }
     </style>
@@ -1174,107 +1391,130 @@
             <div class="setup-container">
                 <h2 class="setup-title">Tournament Setup</h2>
 
-                <!-- Players Input -->
-                <div class="setup-section">
-                    <label class="setup-label">Number of Players</label>
-                    <div class="input-row">
-                        <button class="btn-adjust" id="playersDown">−</button>
-                        <input type="number" id="playersInput" value="8" min="2" max="20">
-                        <button class="btn-adjust" id="playersUp">+</button>
-                    </div>
+                <!-- Presets -->
+                <div class="preset-bar">
+                    <button class="preset-btn" data-preset="quick">
+                        <span class="preset-name">Quick</span>
+                        <span class="preset-detail">1h · 3k stack</span>
+                    </button>
+                    <button class="preset-btn active" data-preset="standard">
+                        <span class="preset-name">Standard</span>
+                        <span class="preset-detail">2h30 · 5k stack</span>
+                    </button>
+                    <button class="preset-btn" data-preset="deep">
+                        <span class="preset-name">Deep Stack</span>
+                        <span class="preset-detail">4h · 10k stack</span>
+                    </button>
                 </div>
 
-                <!-- Duration Input -->
-                <div class="setup-section">
-                    <label class="setup-label">Tournament Duration</label>
-                    <div class="duration-inputs">
-                        <div class="duration-field">
-                            <button class="btn-adjust btn-adjust-sm" id="hoursDown">−</button>
-                            <input type="number" id="hoursInput" value="2" min="0" max="8">
-                            <button class="btn-adjust btn-adjust-sm" id="hoursUp">+</button>
-                            <span>hours</span>
+                <!-- Card: Game -->
+                <div class="setup-card" id="cardGame">
+                    <div class="setup-card-title">Game</div>
+                    <div class="setup-section">
+                        <label class="setup-label">Players</label>
+                        <div class="input-row">
+                            <button class="btn-adjust" id="playersDown">−</button>
+                            <input type="number" id="playersInput" value="8" min="2" max="20">
+                            <button class="btn-adjust" id="playersUp">+</button>
                         </div>
-                        <div class="duration-field">
-                            <button class="btn-adjust btn-adjust-sm" id="minutesDown">−</button>
-                            <input type="number" id="minutesInput" value="30" min="0" max="59">
-                            <button class="btn-adjust btn-adjust-sm" id="minutesUp">+</button>
-                            <span>min</span>
+                    </div>
+                    <div class="setup-section">
+                        <label class="setup-label">Buyin (EUR)</label>
+                        <div class="input-row">
+                            <button class="btn-adjust" id="buyinDown">−</button>
+                            <input type="number" id="buyinInput" value="20" min="1" max="1000" step="5">
+                            <button class="btn-adjust" id="buyinUp">+</button>
+                        </div>
+                    </div>
+                    <div class="setup-section">
+                        <label class="setup-label">Rebuy Period</label>
+                        <div class="input-row">
+                            <button class="btn-adjust" id="rebuyLevelsDown">−</button>
+                            <input type="number" id="rebuyLevelsInput" value="3" min="0" max="10">
+                            <button class="btn-adjust" id="rebuyLevelsUp">+</button>
+                        </div>
+                        <div style="text-align: center; margin-top: 6px; font-size: 10px; color: var(--cream-dim); opacity: 0.5;">
+                            levels · 0 = no rebuys
                         </div>
                     </div>
                 </div>
 
-                <!-- Chips Selection -->
-                <div class="setup-section">
-                    <label class="setup-label">Available Chip Denominations</label>
-                    <div class="chips-grid">
-                        <label class="chip-option">
-                            <input type="checkbox" id="chip5" checked>
-                            <span class="chip-value">5</span>
-                        </label>
-                        <label class="chip-option">
-                            <input type="checkbox" id="chip25" checked>
-                            <span class="chip-value">25</span>
-                        </label>
-                        <label class="chip-option">
-                            <input type="checkbox" id="chip100" checked>
-                            <span class="chip-value">100</span>
-                        </label>
-                        <label class="chip-option">
-                            <input type="checkbox" id="chip500">
-                            <span class="chip-value">500</span>
-                        </label>
-                        <label class="chip-option">
-                            <input type="checkbox" id="chip1000">
-                            <span class="chip-value">1000</span>
-                        </label>
+                <!-- Card: Structure -->
+                <div class="setup-card" id="cardStructure">
+                    <div class="setup-card-title">Structure</div>
+                    <div class="setup-section">
+                        <label class="setup-label">Duration</label>
+                        <div class="duration-inputs">
+                            <div class="duration-field">
+                                <button class="btn-adjust btn-adjust-sm" id="hoursDown">−</button>
+                                <input type="number" id="hoursInput" value="2" min="0" max="8">
+                                <button class="btn-adjust btn-adjust-sm" id="hoursUp">+</button>
+                                <span>hours</span>
+                            </div>
+                            <div class="duration-field">
+                                <button class="btn-adjust btn-adjust-sm" id="minutesDown">−</button>
+                                <input type="number" id="minutesInput" value="30" min="0" max="59">
+                                <button class="btn-adjust btn-adjust-sm" id="minutesUp">+</button>
+                                <span>min</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setup-section">
+                        <label class="setup-label">Blind Levels</label>
+                        <div class="input-row">
+                            <button class="btn-adjust" id="numLevelsDown">−</button>
+                            <input type="number" id="numLevelsInput" value="15" min="5" max="40">
+                            <button class="btn-adjust" id="numLevelsUp">+</button>
+                        </div>
+                    </div>
+                    <div class="setup-section">
+                        <label class="setup-label">Starting Stack</label>
+                        <div class="input-row">
+                            <button class="btn-adjust" id="stackDown">−</button>
+                            <input type="number" id="stackInput" value="5000" min="500" max="100000" step="500">
+                            <button class="btn-adjust" id="stackUp">+</button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Starting Stack -->
-                <div class="setup-section">
-                    <label class="setup-label">Starting Stack</label>
-                    <div class="input-row">
-                        <button class="btn-adjust" id="stackDown">−</button>
-                        <input type="number" id="stackInput" value="5000" min="500" max="100000" step="500">
-                        <button class="btn-adjust" id="stackUp">+</button>
+                <!-- Card: Chips -->
+                <div class="setup-card" id="cardChips">
+                    <div class="setup-card-title">Chips</div>
+                    <div class="setup-section">
+                        <div class="chips-grid">
+                            <label class="chip-option" data-chip="5">
+                                <input type="checkbox" id="chip5" checked>
+                                <span class="chip-value">5</span>
+                            </label>
+                            <label class="chip-option" data-chip="25">
+                                <input type="checkbox" id="chip25" checked>
+                                <span class="chip-value">25</span>
+                            </label>
+                            <label class="chip-option" data-chip="100">
+                                <input type="checkbox" id="chip100" checked>
+                                <span class="chip-value">100</span>
+                            </label>
+                            <label class="chip-option" data-chip="500">
+                                <input type="checkbox" id="chip500">
+                                <span class="chip-value">500</span>
+                            </label>
+                            <label class="chip-option" data-chip="1000">
+                                <input type="checkbox" id="chip1000">
+                                <span class="chip-value">1000</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Buyin Amount -->
-                <div class="setup-section">
-                    <label class="setup-label">Buyin Amount (EUR)</label>
-                    <div class="input-row">
-                        <button class="btn-adjust" id="buyinDown">−</button>
-                        <input type="number" id="buyinInput" value="20" min="1" max="1000" step="5">
-                        <button class="btn-adjust" id="buyinUp">+</button>
-                    </div>
+                <!-- Share bar -->
+                <div class="share-bar" id="shareBar">
+                    <span class="share-bar-icon">&#128279;</span>
+                    <input type="text" class="share-url-preview" id="shareUrlPreview" readonly>
+                    <button class="share-copy-btn" id="shareCopyBtn">Copy</button>
                 </div>
 
-                <!-- Number of Levels -->
-                <div class="setup-section">
-                    <label class="setup-label">Number of Blind Levels</label>
-                    <div class="input-row">
-                        <button class="btn-adjust" id="numLevelsDown">−</button>
-                        <input type="number" id="numLevelsInput" value="15" min="5" max="40">
-                        <button class="btn-adjust" id="numLevelsUp">+</button>
-                    </div>
-                </div>
-
-                <!-- Rebuy Settings -->
-                <div class="setup-section">
-                    <label class="setup-label">Rebuy Period (Levels)</label>
-                    <div class="input-row">
-                        <button class="btn-adjust" id="rebuyLevelsDown">−</button>
-                        <input type="number" id="rebuyLevelsInput" value="3" min="0" max="10">
-                        <button class="btn-adjust" id="rebuyLevelsUp">+</button>
-                    </div>
-                    <div style="text-align: center; margin-top: 8px; font-size: 11px; color: var(--cream-dim); opacity: 0.7;">
-                        Set to 0 to disable rebuys
-                    </div>
-                </div>
-
-                <div id="urlLoadedHint" style="display:none; text-align:center; margin-bottom:16px; font-size:12px; color:var(--gold); opacity:0.7; letter-spacing:0.05em;">
-                    Settings loaded from shared link — adjust as needed
+                <div id="urlLoadedHint" class="share-loaded-msg" style="display:none;">
+                    Settings loaded from shared link
                 </div>
 
                 <div class="setup-actions">
@@ -1317,7 +1557,7 @@
 
                 <div class="summary-actions">
                     <button class="btn-secondary" id="btnBackToSetup">Back</button>
-                    <button class="btn-secondary" id="btnShareUrl">Copy Link</button>
+                    <button class="btn-secondary" id="btnShareUrl">Share Structure</button>
                     <button class="btn-primary" id="btnStartTournament">Start Tournament</button>
                 </div>
             </div>
@@ -1561,81 +1801,119 @@
             `).join('');
         }
 
+        // ========== PRESETS ==========
+        const PRESETS = {
+            quick:    { players: 6, hours: 1, minutes: 0,  stack: 3000,  chips: [5, 25, 100], levels: 8,  buyin: 10, rebuy: 0 },
+            standard: { players: 8, hours: 2, minutes: 30, stack: 5000,  chips: [5, 25, 100], levels: 15, buyin: 20, rebuy: 3 },
+            deep:     { players: 8, hours: 4, minutes: 0,  stack: 10000, chips: [25, 100, 500], levels: 20, buyin: 50, rebuy: 4 },
+        };
+
+        function applyPreset(name) {
+            const p = PRESETS[name];
+            if (!p) return;
+            document.getElementById('playersInput').value = p.players;
+            document.getElementById('hoursInput').value = p.hours;
+            document.getElementById('minutesInput').value = p.minutes;
+            document.getElementById('stackInput').value = p.stack;
+            document.getElementById('numLevelsInput').value = p.levels;
+            document.getElementById('buyinInput').value = p.buyin;
+            document.getElementById('rebuyLevelsInput').value = p.rebuy;
+            ['5','25','100','500','1000'].forEach(v => {
+                document.getElementById('chip' + v).checked = p.chips.includes(parseInt(v));
+            });
+            document.querySelectorAll('.preset-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.preset === name);
+            });
+            updateSetupShareUrl();
+        }
+
+        function clearPresetSelection() {
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+        }
+
+        function updateSetupShareUrl() {
+            const chips = getSelectedChips();
+            const chipStr = Object.entries(chips).filter(([_,v]) => v).map(([k]) => k).join(',');
+            const params = new URLSearchParams({
+                p: document.getElementById('playersInput').value,
+                h: document.getElementById('hoursInput').value,
+                m: document.getElementById('minutesInput').value,
+                c: chipStr,
+                s: document.getElementById('stackInput').value,
+                l: document.getElementById('numLevelsInput').value,
+                b: document.getElementById('buyinInput').value,
+                r: document.getElementById('rebuyLevelsInput').value
+            });
+            const url = window.location.origin + window.location.pathname + '?' + params.toString();
+            document.getElementById('shareUrlPreview').value = url;
+        }
+
         function initSetupHandlers() {
-            // Players +/- buttons
-            document.getElementById('playersUp').addEventListener('click', () => {
-                const input = document.getElementById('playersInput');
-                input.value = Math.min(20, parseInt(input.value || 0) + 1);
+            // Presets
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
             });
 
-            document.getElementById('playersDown').addEventListener('click', () => {
-                const input = document.getElementById('playersInput');
-                input.value = Math.max(2, parseInt(input.value || 0) - 1);
+            // Share copy button
+            document.getElementById('shareCopyBtn').addEventListener('click', () => {
+                const url = document.getElementById('shareUrlPreview').value;
+                navigator.clipboard.writeText(url).then(() => {
+                    const btn = document.getElementById('shareCopyBtn');
+                    btn.textContent = 'Copied!';
+                    setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+                }).catch(() => {
+                    prompt('Copy this URL:', url);
+                });
             });
 
-            // Duration +/- buttons
-            document.getElementById('hoursUp').addEventListener('click', () => {
-                const input = document.getElementById('hoursInput');
-                input.value = Math.min(8, parseInt(input.value || 0) + 1);
+            // Clear preset on any manual change and update share URL
+            const setupInputs = document.querySelectorAll('.setup-card input');
+            setupInputs.forEach(input => {
+                input.addEventListener('input', () => { clearPresetSelection(); updateSetupShareUrl(); });
+                input.addEventListener('change', () => { clearPresetSelection(); updateSetupShareUrl(); });
             });
-            document.getElementById('hoursDown').addEventListener('click', () => {
-                const input = document.getElementById('hoursInput');
-                input.value = Math.max(0, parseInt(input.value || 0) - 1);
-            });
+
+            // Helper: adjust value, clear preset, update share URL
+            function setupAdj(id, delta, min, max) {
+                const input = document.getElementById(id);
+                input.value = Math.min(max, Math.max(min, parseInt(input.value || 0) + delta));
+                clearPresetSelection();
+                updateSetupShareUrl();
+            }
+
+            // Players +/-
+            document.getElementById('playersUp').addEventListener('click', () => setupAdj('playersInput', 1, 2, 20));
+            document.getElementById('playersDown').addEventListener('click', () => setupAdj('playersInput', -1, 2, 20));
+
+            // Duration +/-
+            document.getElementById('hoursUp').addEventListener('click', () => setupAdj('hoursInput', 1, 0, 8));
+            document.getElementById('hoursDown').addEventListener('click', () => setupAdj('hoursInput', -1, 0, 8));
             document.getElementById('minutesUp').addEventListener('click', () => {
                 const input = document.getElementById('minutesInput');
-                const val = parseInt(input.value || 0) + 10;
-                input.value = val > 59 ? 0 : val;
+                input.value = (parseInt(input.value || 0) + 10) > 59 ? 0 : parseInt(input.value || 0) + 10;
+                clearPresetSelection(); updateSetupShareUrl();
             });
             document.getElementById('minutesDown').addEventListener('click', () => {
                 const input = document.getElementById('minutesInput');
-                const val = parseInt(input.value || 0) - 10;
-                input.value = val < 0 ? 50 : val;
+                input.value = (parseInt(input.value || 0) - 10) < 0 ? 50 : parseInt(input.value || 0) - 10;
+                clearPresetSelection(); updateSetupShareUrl();
             });
 
-            // Starting Stack +/- buttons
-            document.getElementById('stackUp').addEventListener('click', () => {
-                const input = document.getElementById('stackInput');
-                input.value = Math.min(100000, parseInt(input.value || 0) + 500);
-            });
+            // Stack +/-
+            document.getElementById('stackUp').addEventListener('click', () => setupAdj('stackInput', 500, 500, 100000));
+            document.getElementById('stackDown').addEventListener('click', () => setupAdj('stackInput', -500, 500, 100000));
 
-            document.getElementById('stackDown').addEventListener('click', () => {
-                const input = document.getElementById('stackInput');
-                input.value = Math.max(500, parseInt(input.value || 0) - 500);
-            });
+            // Buyin +/-
+            document.getElementById('buyinUp').addEventListener('click', () => setupAdj('buyinInput', 5, 1, 1000));
+            document.getElementById('buyinDown').addEventListener('click', () => setupAdj('buyinInput', -5, 1, 1000));
 
-            // Buyin +/- buttons
-            document.getElementById('buyinUp').addEventListener('click', () => {
-                const input = document.getElementById('buyinInput');
-                input.value = Math.min(1000, parseInt(input.value || 0) + 5);
-            });
+            // Levels +/-
+            document.getElementById('numLevelsUp').addEventListener('click', () => setupAdj('numLevelsInput', 1, 5, 40));
+            document.getElementById('numLevelsDown').addEventListener('click', () => setupAdj('numLevelsInput', -1, 5, 40));
 
-            document.getElementById('buyinDown').addEventListener('click', () => {
-                const input = document.getElementById('buyinInput');
-                input.value = Math.max(1, parseInt(input.value || 0) - 5);
-            });
-
-            // Number of levels +/- buttons
-            document.getElementById('numLevelsUp').addEventListener('click', () => {
-                const input = document.getElementById('numLevelsInput');
-                input.value = Math.min(40, parseInt(input.value || 0) + 1);
-            });
-
-            document.getElementById('numLevelsDown').addEventListener('click', () => {
-                const input = document.getElementById('numLevelsInput');
-                input.value = Math.max(5, parseInt(input.value || 0) - 1);
-            });
-
-            // Rebuy levels +/- buttons
-            document.getElementById('rebuyLevelsUp').addEventListener('click', () => {
-                const input = document.getElementById('rebuyLevelsInput');
-                input.value = Math.min(10, parseInt(input.value || 0) + 1);
-            });
-
-            document.getElementById('rebuyLevelsDown').addEventListener('click', () => {
-                const input = document.getElementById('rebuyLevelsInput');
-                input.value = Math.max(0, parseInt(input.value || 0) - 1);
-            });
+            // Rebuy +/-
+            document.getElementById('rebuyLevelsUp').addEventListener('click', () => setupAdj('rebuyLevelsInput', 1, 0, 10));
+            document.getElementById('rebuyLevelsDown').addEventListener('click', () => setupAdj('rebuyLevelsInput', -1, 0, 10));
 
             // Calculate button
             const btnCalculate = document.getElementById('btnCalculate');
@@ -1740,7 +2018,7 @@
                 const url = window.location.origin + window.location.pathname + '?' + params.toString();
                 navigator.clipboard.writeText(url).then(() => {
                     btnShare.textContent = 'Copied!';
-                    setTimeout(() => { btnShare.textContent = 'Copy Link'; }, 2000);
+                    setTimeout(() => { btnShare.textContent = 'Share Structure'; }, 2000);
                 }).catch(() => {
                     prompt('Copy this URL:', url);
                 });
@@ -2267,6 +2545,12 @@
             // No full structure - just show setup with pre-filled values
             if (params.has('l')) document.getElementById('numLevelsInput').value = params.get('l');
             document.getElementById('urlLoadedHint').style.display = 'block';
+            clearPresetSelection();
+            // Pulse cards to show values were loaded
+            document.querySelectorAll('.setup-card').forEach(card => {
+                card.classList.add('url-loaded');
+                setTimeout(() => card.classList.remove('url-loaded'), 1500);
+            });
             return true;
         }
 
@@ -2366,8 +2650,11 @@
         initSummaryHandlers();
         initTimerScreenHandlers();
 
-        // If URL has params, just populate the setup form (user can review and change before calculating)
+        // If URL has params, load them
         loadFromUrlParams();
+
+        // Initialize share URL preview
+        updateSetupShareUrl();
     </script>
 </body>
 </html>
