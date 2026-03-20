@@ -871,6 +871,124 @@
             z-index: 100;
         }
 
+        /* Radiooooo floating panel */
+        .radio-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, var(--gold-light), var(--gold-dark));
+            border: 2px solid var(--gold);
+            color: var(--black-deep);
+            font-size: 22px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 200;
+            box-shadow: 0 4px 20px rgba(212, 168, 75, 0.4);
+            transition: all 0.3s ease;
+            padding: 0;
+        }
+
+        .radio-btn.visible {
+            display: flex;
+        }
+
+        .radio-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 28px rgba(212, 168, 75, 0.6);
+        }
+
+        .radio-btn.active {
+            background: linear-gradient(180deg, var(--felt-light), var(--felt));
+            border-color: var(--felt-light);
+            color: var(--gold);
+            box-shadow: 0 4px 20px rgba(17, 122, 74, 0.4);
+        }
+
+        .radio-panel {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 380px;
+            height: 520px;
+            background: var(--black-deep);
+            border-radius: 12px;
+            border: 1px solid rgba(212, 168, 75, 0.3);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+            z-index: 199;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .radio-panel.open {
+            display: flex;
+        }
+
+        .radio-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: rgba(0, 0, 0, 0.4);
+            border-bottom: 1px solid rgba(212, 168, 75, 0.15);
+        }
+
+        .radio-panel-title {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--gold);
+        }
+
+        .radio-panel-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .radio-panel-btn {
+            background: none;
+            border: none;
+            color: var(--cream-dim);
+            font-size: 14px;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .radio-panel-btn:hover {
+            color: var(--gold);
+            background: rgba(212, 168, 75, 0.1);
+        }
+
+        .radio-panel iframe {
+            flex: 1;
+            width: 100%;
+            border: none;
+        }
+
+        @media (max-width: 600px) {
+            .radio-panel {
+                width: calc(100vw - 24px);
+                right: 12px;
+                bottom: 76px;
+                height: 60vh;
+            }
+
+            .radio-btn {
+                bottom: 14px;
+                right: 14px;
+                width: 46px;
+                height: 46px;
+                font-size: 20px;
+            }
+        }
+
         @media (max-width: 600px) {
             .setup-container,
             .summary-container {
@@ -917,11 +1035,24 @@
 
     <!-- Hidden YouTube player -->
     <iframe id="ytPlayer"
-        style="position:fixed;bottom:20px;right:20px;width:280px;height:158px;opacity:0;pointer-events:none;z-index:10;border-radius:8px;border:none;"
+        style="position:fixed;bottom:20px;right:80px;width:280px;height:158px;opacity:0;pointer-events:none;z-index:10;border-radius:8px;border:none;"
         src=""
         allow="autoplay; encrypted-media"
         allowfullscreen>
     </iframe>
+
+    <!-- Radiooooo floating button & panel -->
+    <button class="radio-btn" id="radioBtn" title="Radiooooo">&#9835;</button>
+    <div class="radio-panel" id="radioPanel">
+        <div class="radio-panel-header">
+            <span class="radio-panel-title">Radiooooo</span>
+            <div class="radio-panel-actions">
+                <button class="radio-panel-btn" id="radioPopout" title="Open in new window">&#8599;</button>
+                <button class="radio-panel-btn" id="radioClose" title="Close">&times;</button>
+            </div>
+        </div>
+        <iframe id="radioFrame" src="" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+    </div>
 
     <div class="container">
         <!-- ========== SETUP SCREEN ========== -->
@@ -1247,6 +1378,12 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenName + 'Screen').classList.add('active');
             appState.screen = screenName;
+
+            // Show radio button only on timer screen
+            document.getElementById('radioBtn').classList.toggle('visible', screenName === 'timer');
+            if (screenName !== 'timer') {
+                document.getElementById('radioPanel').classList.remove('open');
+            }
 
             // Request wake lock when entering timer screen
             if (screenName === 'timer') {
@@ -1863,6 +2000,58 @@
             }
 
             return true;
+        }
+
+        // ========== RADIOOOOO INTEGRATION ==========
+        const radioBtnEl = document.getElementById('radioBtn');
+        const radioPanelEl = document.getElementById('radioPanel');
+        const radioFrameEl = document.getElementById('radioFrame');
+        let radioLoaded = false;
+        let radioOpen = false;
+        let radioPopupWindow = null;
+
+        radioBtnEl.addEventListener('click', () => {
+            radioOpen = !radioOpen;
+            radioBtnEl.classList.toggle('active', radioOpen);
+            radioPanelEl.classList.toggle('open', radioOpen);
+
+            if (radioOpen && !radioLoaded) {
+                radioFrameEl.src = 'https://app.radiooooo.com/';
+                radioLoaded = true;
+
+                // Detect if iframe is blocked - if after 3s the iframe has no content, offer popup
+                setTimeout(() => {
+                    try {
+                        // Can't access cross-origin iframe content, but if it loaded it won't error
+                        if (radioFrameEl.contentDocument && radioFrameEl.contentDocument.body.children.length === 0) {
+                            offerRadioPopup();
+                        }
+                    } catch (e) {
+                        // Cross-origin = loaded successfully
+                    }
+                }, 3000);
+            }
+        });
+
+        document.getElementById('radioClose').addEventListener('click', () => {
+            radioOpen = false;
+            radioBtnEl.classList.remove('active');
+            radioPanelEl.classList.remove('open');
+        });
+
+        document.getElementById('radioPopout').addEventListener('click', () => {
+            openRadioPopup();
+            radioOpen = false;
+            radioBtnEl.classList.remove('active');
+            radioPanelEl.classList.remove('open');
+        });
+
+        function openRadioPopup() {
+            if (radioPopupWindow && !radioPopupWindow.closed) {
+                radioPopupWindow.focus();
+            } else {
+                radioPopupWindow = window.open('https://app.radiooooo.com/', 'radiooooo', 'width=400,height=600,left=100,top=100');
+            }
         }
 
         // Initialize app
