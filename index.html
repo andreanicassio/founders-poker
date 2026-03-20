@@ -238,33 +238,31 @@
         }
 
         .rebuy-info {
-            font-size: clamp(11px, 2vw, 13px);
-            font-weight: 400;
-            color: var(--cream-dim);
+            font-size: clamp(13px, 2.5vw, 16px);
+            font-weight: 500;
+            color: var(--cream);
             margin-bottom: 16px;
-            padding: 6px 14px;
-            background: rgba(0, 0, 0, 0.15);
-            border-radius: 6px;
-            border: 1px solid rgba(212, 168, 75, 0.1);
-            letter-spacing: 0.02em;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 8px;
+            border: 1px solid rgba(212, 168, 75, 0.2);
+            letter-spacing: 0.03em;
             display: inline-flex;
-            gap: 8px;
+            gap: 10px;
             align-items: center;
-            opacity: 0.6;
-            transition: opacity 0.3s ease;
-        }
-
-        .rebuy-info:hover {
-            opacity: 1;
+            transition: all 0.3s ease;
         }
 
         .rebuy-info.available {
-            border-color: rgba(17, 122, 74, 0.25);
-            background: rgba(17, 122, 74, 0.08);
+            border-color: rgba(17, 122, 74, 0.5);
+            background: rgba(17, 122, 74, 0.15);
+            box-shadow: 0 0 20px rgba(17, 122, 74, 0.15);
         }
 
         .rebuy-info.unavailable {
-            opacity: 0.35;
+            opacity: 0.3;
+            font-size: clamp(11px, 2vw, 13px);
+            padding: 6px 14px;
         }
 
         .rebuy-info .label {
@@ -272,13 +270,13 @@
             text-transform: uppercase;
             font-size: 0.85em;
             letter-spacing: 0.12em;
-            font-weight: 500;
-            opacity: 0.8;
+            font-weight: 600;
         }
 
         .rebuy-info .amount {
             color: var(--gold-light);
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 1.1em;
         }
 
         .rebuy-info .divider {
@@ -289,7 +287,7 @@
 
         .rebuy-info .status {
             font-size: 0.92em;
-            opacity: 0.8;
+            font-weight: 500;
         }
 
         .controls {
@@ -625,7 +623,7 @@
         }
 
         .setup-section input[type="number"] {
-            width: 80px;
+            width: 90px;
             height: 56px;
             text-align: center;
             font-family: 'Playfair Display', Georgia, serif;
@@ -1007,6 +1005,16 @@
                     </div>
                 </div>
 
+                <!-- Number of Levels -->
+                <div class="setup-section">
+                    <label class="setup-label">Number of Blind Levels</label>
+                    <div class="input-row">
+                        <button class="btn-adjust" id="numLevelsDown">−</button>
+                        <input type="number" id="numLevelsInput" value="15" min="5" max="40">
+                        <button class="btn-adjust" id="numLevelsUp">+</button>
+                    </div>
+                </div>
+
                 <!-- Rebuy Settings -->
                 <div class="setup-section">
                     <label class="setup-label">Rebuy Period (Levels)</label>
@@ -1060,6 +1068,7 @@
 
                 <div class="summary-actions">
                     <button class="btn-secondary" id="btnBackToSetup">Back</button>
+                    <button class="btn-secondary" id="btnShareUrl">Copy Link</button>
                     <button class="btn-primary" id="btnStartTournament">Start Tournament</button>
                 </div>
             </div>
@@ -1134,6 +1143,7 @@
                 duration: { hours: 2, minutes: 30 },
                 chips: { 5: true, 25: true, 100: true, 500: false, 1000: false },
                 startingStack: 5000,
+                numLevels: 15,
                 buyinAmount: 20,
                 rebuyLevels: 3
             },
@@ -1144,7 +1154,7 @@
 
         // ========== TOURNAMENT CALCULATION ALGORITHM ==========
         function calculateTournamentStructure(config) {
-            const { players, duration, chips, startingStack } = config;
+            const { players, duration, chips, startingStack, numLevels: requestedLevels } = config;
             const totalMinutes = duration.hours * 60 + duration.minutes;
 
             // Get active chip denominations sorted ascending
@@ -1160,16 +1170,12 @@
             const minChip = activeChips[0];
             const totalSeconds = totalMinutes * 60;
 
-            // Calculate number of levels (target ~12-15 min per level)
-            let numLevels = Math.max(10, Math.min(25, Math.round(totalMinutes / 12)));
+            // Use the user-specified number of levels
+            const numLevels = requestedLevels || 15;
 
-            // Calculate duration per level
+            // Calculate duration per level based on total time and number of levels
             let levelDuration = Math.floor(totalSeconds / numLevels);
-            levelDuration = Math.max(8 * 60, Math.min(20 * 60, levelDuration));
-
-            // Recalculate number of levels
-            numLevels = Math.round(totalSeconds / levelDuration);
-            numLevels = Math.max(10, Math.min(25, numLevels));
+            levelDuration = Math.max(5 * 60, Math.min(20 * 60, levelDuration));
 
             // Generate blinds structure based on starting stack
             const levels = generateBlindsStructure(numLevels, minChip, startingStack, levelDuration);
@@ -1314,6 +1320,17 @@
                 input.value = Math.max(1, parseInt(input.value || 0) - 5);
             });
 
+            // Number of levels +/- buttons
+            document.getElementById('numLevelsUp').addEventListener('click', () => {
+                const input = document.getElementById('numLevelsInput');
+                input.value = Math.min(40, parseInt(input.value || 0) + 1);
+            });
+
+            document.getElementById('numLevelsDown').addEventListener('click', () => {
+                const input = document.getElementById('numLevelsInput');
+                input.value = Math.max(5, parseInt(input.value || 0) - 1);
+            });
+
             // Rebuy levels +/- buttons
             document.getElementById('rebuyLevelsUp').addEventListener('click', () => {
                 const input = document.getElementById('rebuyLevelsInput');
@@ -1345,6 +1362,7 @@
                 }
 
                 const startingStack = parseInt(document.getElementById('stackInput').value) || 5000;
+                const numLevels = parseInt(document.getElementById('numLevelsInput').value) || 15;
                 const buyinAmount = parseInt(document.getElementById('buyinInput').value) || 20;
                 const rebuyLevels = parseInt(document.getElementById('rebuyLevelsInput').value) || 0;
 
@@ -1360,6 +1378,7 @@
                     duration: { hours, minutes },
                     chips,
                     startingStack,
+                    numLevels,
                     buyinAmount,
                     rebuyLevels
                 };
@@ -1392,6 +1411,32 @@
             const goBack = () => showScreen('setup');
             btnBack.addEventListener('click', goBack);
             btnBack.addEventListener('touchend', (e) => { e.preventDefault(); goBack(); });
+
+            // Share URL button
+            const btnShare = document.getElementById('btnShareUrl');
+            const shareUrl = () => {
+                const c = appState.config;
+                const chipStr = Object.entries(c.chips).filter(([_,v]) => v).map(([k]) => k).join(',');
+                const params = new URLSearchParams({
+                    p: c.players,
+                    h: c.duration.hours,
+                    m: c.duration.minutes,
+                    c: chipStr,
+                    s: c.startingStack,
+                    l: c.numLevels,
+                    b: c.buyinAmount,
+                    r: c.rebuyLevels
+                });
+                const url = window.location.origin + window.location.pathname + '?' + params.toString();
+                navigator.clipboard.writeText(url).then(() => {
+                    btnShare.textContent = 'Copied!';
+                    setTimeout(() => { btnShare.textContent = 'Copy Link'; }, 2000);
+                }).catch(() => {
+                    prompt('Copy this URL:', url);
+                });
+            };
+            btnShare.addEventListener('click', shareUrl);
+            btnShare.addEventListener('touchend', (e) => { e.preventDefault(); shareUrl(); });
 
             const startTournament = () => {
                 // Gather edited values
@@ -1796,11 +1841,39 @@
             }
         });
 
+        // Load config from URL parameters
+        function loadFromUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.size === 0) return false;
+
+            if (params.has('p')) document.getElementById('playersInput').value = params.get('p');
+            if (params.has('h')) document.getElementById('hoursInput').value = params.get('h');
+            if (params.has('m')) document.getElementById('minutesInput').value = params.get('m');
+            if (params.has('s')) document.getElementById('stackInput').value = params.get('s');
+            if (params.has('l')) document.getElementById('numLevelsInput').value = params.get('l');
+            if (params.has('b')) document.getElementById('buyinInput').value = params.get('b');
+            if (params.has('r')) document.getElementById('rebuyLevelsInput').value = params.get('r');
+
+            if (params.has('c')) {
+                const activeChips = params.get('c').split(',').map(Number);
+                ['5','25','100','500','1000'].forEach(v => {
+                    const el = document.getElementById('chip' + v);
+                    if (el) el.checked = activeChips.includes(parseInt(v));
+                });
+            }
+
+            return true;
+        }
+
         // Initialize app
         initSetupHandlers();
         initSummaryHandlers();
         initTimerScreenHandlers();
-        // Start with setup screen (already set as active in HTML)
+
+        // If URL has params, load them and auto-calculate
+        if (loadFromUrlParams()) {
+            document.getElementById('btnCalculate').click();
+        }
     </script>
 </body>
 </html>
