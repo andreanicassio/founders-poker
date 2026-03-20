@@ -519,22 +519,52 @@
             box-shadow: 0 0 20px rgba(196, 30, 58, 0.6);
         }
 
-        /* Late-game tension glow */
+        /* Late-game tension effects */
         .timer-screen-tense .blinds {
-            text-shadow: 0 0 30px rgba(230, 57, 80, 0.3), 0 2px 8px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 0 40px rgba(230, 57, 80, 0.4), 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .timer-screen-tense .blinds-divider {
+            color: var(--red-light);
         }
 
         .timer-screen-tense .level-indicator {
             color: var(--red-light);
         }
 
+        .timer-screen-tense .brand-name {
+            background: linear-gradient(180deg, #e84a64 0%, #c41e3a 50%, #8a1528 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
         .timer-screen-tense .next-level {
-            border-color: rgba(196, 30, 58, 0.25);
-            background: rgba(196, 30, 58, 0.08);
+            border-color: rgba(196, 30, 58, 0.3);
+            background: rgba(196, 30, 58, 0.1);
         }
 
         .timer-screen-tense .next-level .label {
             color: var(--red-light);
+        }
+
+        .timer-screen-tense .level-btn {
+            border-color: rgba(196, 30, 58, 0.2);
+        }
+
+        .timer-screen-tense .level-btn.active {
+            background: linear-gradient(180deg, var(--red-light), var(--red));
+            border-color: var(--red-light);
+            box-shadow: 0 4px 16px rgba(196, 30, 58, 0.4);
+        }
+
+        .timer-screen-tense .level-btn.completed {
+            color: var(--red-light);
+            border-color: rgba(196, 30, 58, 0.3);
+        }
+
+        .timer-screen-tense .progress-bar {
+            background: linear-gradient(90deg, var(--red), var(--red-light));
+            box-shadow: 0 0 20px rgba(196, 30, 58, 0.4);
         }
 
         /* Decorative suits */
@@ -1979,7 +2009,6 @@
 
         function updateAtmosphere() {
             if (appState.screen !== 'timer') {
-                // Reset to default green
                 document.documentElement.style.setProperty('--atmo-felt', '#0d4a2e');
                 document.documentElement.style.setProperty('--atmo-felt-dark', '#0a3522');
                 document.documentElement.style.setProperty('--atmo-vignette', '0.4');
@@ -1989,52 +2018,48 @@
             const totalLevels = LEVELS.length;
             const progress = currentLevel / Math.max(totalLevels - 1, 1); // 0 to 1
 
-            // Phase 1 (0-40%): Calm green felt
-            // Phase 2 (40-70%): Transition to warm amber
-            // Phase 3 (70-100%): Deep red tension
-            let feltR, feltG, feltB, darkR, darkG, darkB, vignette;
+            // Interpolate through color stops:
+            // 0%   -> Bright green felt  (20, 100, 55) / (12, 65, 38)
+            // 25%  -> Yellow-green       (60, 100, 30) / (35, 65, 18)
+            // 50%  -> Golden amber       (140, 90, 15) / (85, 55, 8)
+            // 75%  -> Deep orange-red    (160, 40, 12) / (95, 22, 6)
+            // 100% -> Near black         (30, 8, 5)    / (12, 4, 2)
+            const stops = [
+                { p: 0,    f: [20, 100, 55],  d: [12, 65, 38],  v: 0.35 },
+                { p: 0.25, f: [60, 100, 30],  d: [35, 65, 18],  v: 0.4  },
+                { p: 0.5,  f: [140, 90, 15],  d: [85, 55, 8],   v: 0.5  },
+                { p: 0.75, f: [160, 40, 12],  d: [95, 22, 6],   v: 0.6  },
+                { p: 1.0,  f: [30, 8, 5],     d: [12, 4, 2],    v: 0.8  },
+            ];
 
-            if (progress < 0.4) {
-                const t = progress / 0.4;
-                // Green -> slightly warmer green
-                feltR = Math.round(13 + t * 15);
-                feltG = Math.round(74 - t * 10);
-                feltB = Math.round(46 - t * 10);
-                darkR = Math.round(10 + t * 10);
-                darkG = Math.round(53 - t * 10);
-                darkB = Math.round(34 - t * 10);
-                vignette = 0.4 + t * 0.05;
-            } else if (progress < 0.7) {
-                const t = (progress - 0.4) / 0.3;
-                // Warm green -> amber/brown
-                feltR = Math.round(28 + t * 40);
-                feltG = Math.round(64 - t * 30);
-                feltB = Math.round(36 - t * 20);
-                darkR = Math.round(20 + t * 25);
-                darkG = Math.round(43 - t * 22);
-                darkB = Math.round(24 - t * 14);
-                vignette = 0.45 + t * 0.1;
-            } else {
-                const t = (progress - 0.7) / 0.3;
-                // Amber -> deep red/dark
-                feltR = Math.round(68 + t * 30);
-                feltG = Math.round(34 - t * 20);
-                feltB = Math.round(16 - t * 5);
-                darkR = Math.round(45 + t * 20);
-                darkG = Math.round(21 - t * 12);
-                darkB = Math.round(10 - t * 3);
-                vignette = 0.55 + t * 0.15;
+            // Find surrounding stops
+            let lo = stops[0], hi = stops[stops.length - 1];
+            for (let i = 0; i < stops.length - 1; i++) {
+                if (progress >= stops[i].p && progress <= stops[i + 1].p) {
+                    lo = stops[i];
+                    hi = stops[i + 1];
+                    break;
+                }
             }
 
-            const felt = `rgb(${feltR}, ${feltG}, ${feltB})`;
-            const dark = `rgb(${darkR}, ${darkG}, ${darkB})`;
-            document.documentElement.style.setProperty('--atmo-felt', felt);
-            document.documentElement.style.setProperty('--atmo-felt-dark', dark);
-            document.documentElement.style.setProperty('--atmo-vignette', vignette.toString());
+            const t = (progress - lo.p) / Math.max(hi.p - lo.p, 0.001);
+            const lerp = (a, b) => Math.round(a + (b - a) * t);
 
-            // Add tense class for late game visual effects
+            const feltR = lerp(lo.f[0], hi.f[0]);
+            const feltG = lerp(lo.f[1], hi.f[1]);
+            const feltB = lerp(lo.f[2], hi.f[2]);
+            const darkR = lerp(lo.d[0], hi.d[0]);
+            const darkG = lerp(lo.d[1], hi.d[1]);
+            const darkB = lerp(lo.d[2], hi.d[2]);
+            const vignette = lo.v + (hi.v - lo.v) * t;
+
+            document.documentElement.style.setProperty('--atmo-felt', `rgb(${feltR},${feltG},${feltB})`);
+            document.documentElement.style.setProperty('--atmo-felt-dark', `rgb(${darkR},${darkG},${darkB})`);
+            document.documentElement.style.setProperty('--atmo-vignette', vignette.toFixed(2));
+
+            // Tense class for late game
             const timerScreen = document.getElementById('timerScreen');
-            timerScreen.classList.toggle('timer-screen-tense', progress > 0.7);
+            timerScreen.classList.toggle('timer-screen-tense', progress > 0.6);
         }
 
         function createLevelSelector() {
