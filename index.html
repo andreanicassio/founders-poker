@@ -1677,20 +1677,35 @@
             btnBack.addEventListener('click', goBack);
             btnBack.addEventListener('touchend', (e) => { e.preventDefault(); goBack(); });
 
-            // Share URL button
+            // Share URL button - captures the EDITED structure, not just config
             const btnShare = document.getElementById('btnShareUrl');
             const shareUrl = () => {
                 const c = appState.config;
                 const chipStr = Object.entries(c.chips).filter(([_,v]) => v).map(([k]) => k).join(',');
+
+                // Read current edited values from the summary table
+                const stack = parseInt(document.getElementById('summaryStackInput').value) || c.startingStack;
+                const rows = document.querySelectorAll('#levelsTableBody tr');
+                const levelParts = [];
+                rows.forEach(row => {
+                    const sb = parseInt(row.querySelector('.level-sb').value) || 0;
+                    const bb = parseInt(row.querySelector('.level-bb').value) || 0;
+                    const ante = parseInt(row.querySelector('.level-ante').value) || 0;
+                    const dur = parseInt(row.querySelector('.level-duration').value) || 15;
+                    if (sb > 0 && bb > 0) {
+                        levelParts.push(`${sb}.${bb}.${ante}.${dur}`);
+                    }
+                });
+
                 const params = new URLSearchParams({
                     p: c.players,
                     h: c.duration.hours,
                     m: c.duration.minutes,
                     c: chipStr,
-                    s: c.startingStack,
-                    l: c.numLevels,
+                    s: stack,
                     b: c.buyinAmount,
-                    r: c.rebuyLevels
+                    r: c.rebuyLevels,
+                    lv: levelParts.join(',')
                 });
                 const url = window.location.origin + window.location.pathname + '?' + params.toString();
                 navigator.clipboard.writeText(url).then(() => {
@@ -2172,11 +2187,11 @@
             const params = new URLSearchParams(window.location.search);
             if (params.size === 0) return false;
 
+            // Always populate setup fields
             if (params.has('p')) document.getElementById('playersInput').value = params.get('p');
             if (params.has('h')) document.getElementById('hoursInput').value = params.get('h');
             if (params.has('m')) document.getElementById('minutesInput').value = params.get('m');
             if (params.has('s')) document.getElementById('stackInput').value = params.get('s');
-            if (params.has('l')) document.getElementById('numLevelsInput').value = params.get('l');
             if (params.has('b')) document.getElementById('buyinInput').value = params.get('b');
             if (params.has('r')) document.getElementById('rebuyLevelsInput').value = params.get('r');
 
@@ -2188,6 +2203,46 @@
                 });
             }
 
+            // If full blind structure is in URL, load it and go straight to summary
+            if (params.has('lv')) {
+                const lvStr = params.get('lv');
+                const levels = lvStr.split(',').map(l => {
+                    const [sb, bb, ante, dur] = l.split('.').map(Number);
+                    return { sb, bb, ante, duration: dur * 60 };
+                }).filter(l => l.sb > 0 && l.bb > 0);
+
+                if (levels.length > 0) {
+                    const stack = parseInt(params.get('s')) || 5000;
+                    document.getElementById('numLevelsInput').value = levels.length;
+
+                    // Build config from URL
+                    appState.config = {
+                        players: parseInt(params.get('p')) || 8,
+                        duration: {
+                            hours: parseInt(params.get('h')) || 2,
+                            minutes: parseInt(params.get('m')) || 30
+                        },
+                        chips: getSelectedChips(),
+                        startingStack: stack,
+                        numLevels: levels.length,
+                        buyinAmount: parseInt(params.get('b')) || 20,
+                        rebuyLevels: parseInt(params.get('r')) || 0
+                    };
+
+                    appState.structure = {
+                        startingStack: stack,
+                        levelDuration: levels[0].duration,
+                        levels
+                    };
+
+                    renderSummary();
+                    showScreen('summary');
+                    return true;
+                }
+            }
+
+            // No full structure - just show setup with pre-filled values
+            if (params.has('l')) document.getElementById('numLevelsInput').value = params.get('l');
             document.getElementById('urlLoadedHint').style.display = 'block';
             return true;
         }
