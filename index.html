@@ -28,15 +28,21 @@
             --red-light: #e63950;
             --black: #1a1a1a;
             --black-deep: #0d0d0d;
+            /* Atmosphere shift vars - set dynamically via JS */
+            --atmo-felt: #0d4a2e;
+            --atmo-felt-dark: #0a3522;
+            --atmo-vignette: 0.4;
+            --atmo-accent: #d4a84b;
         }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--felt-dark);
+            background: var(--atmo-felt-dark);
             background-image:
-                radial-gradient(ellipse 100% 100% at 50% 50%, var(--felt) 0%, var(--felt-dark) 70%),
+                radial-gradient(ellipse 100% 100% at 50% 50%, var(--atmo-felt) 0%, var(--atmo-felt-dark) 70%),
                 url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
             background-blend-mode: normal, overlay;
+            transition: background 2s ease;
             color: var(--cream);
             min-height: 100vh;
             min-height: 100dvh;
@@ -56,8 +62,9 @@
             content: '';
             position: fixed;
             inset: 0;
-            background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 100%);
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,var(--atmo-vignette)) 100%);
             pointer-events: none;
+            transition: background 2s ease;
         }
 
         /* Subtle light from above */
@@ -512,6 +519,24 @@
             box-shadow: 0 0 20px rgba(196, 30, 58, 0.6);
         }
 
+        /* Late-game tension glow */
+        .timer-screen-tense .blinds {
+            text-shadow: 0 0 30px rgba(230, 57, 80, 0.3), 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .timer-screen-tense .level-indicator {
+            color: var(--red-light);
+        }
+
+        .timer-screen-tense .next-level {
+            border-color: rgba(196, 30, 58, 0.25);
+            background: rgba(196, 30, 58, 0.08);
+        }
+
+        .timer-screen-tense .next-level .label {
+            color: var(--red-light);
+        }
+
         /* Decorative suits */
         .suit {
             position: fixed;
@@ -622,6 +647,12 @@
             border-color: var(--gold);
         }
 
+        .btn-adjust-sm {
+            width: 36px;
+            height: 36px;
+            font-size: 18px;
+        }
+
         .setup-section input[type="number"] {
             width: 90px;
             height: 56px;
@@ -654,9 +685,11 @@
 
         .duration-field {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+            flex-wrap: wrap;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            gap: 8px;
         }
 
         .duration-field input {
@@ -670,6 +703,8 @@
             letter-spacing: 0.1em;
             text-transform: uppercase;
             color: var(--cream-dim);
+            width: 100%;
+            text-align: center;
         }
 
         /* Chips Selection */
@@ -1124,11 +1159,15 @@
                     <label class="setup-label">Tournament Duration</label>
                     <div class="duration-inputs">
                         <div class="duration-field">
+                            <button class="btn-adjust btn-adjust-sm" id="hoursDown">−</button>
                             <input type="number" id="hoursInput" value="2" min="0" max="8">
+                            <button class="btn-adjust btn-adjust-sm" id="hoursUp">+</button>
                             <span>hours</span>
                         </div>
                         <div class="duration-field">
+                            <button class="btn-adjust btn-adjust-sm" id="minutesDown">−</button>
                             <input type="number" id="minutesInput" value="30" min="0" max="59">
+                            <button class="btn-adjust btn-adjust-sm" id="minutesUp">+</button>
                             <span>min</span>
                         </div>
                     </div>
@@ -1202,6 +1241,10 @@
                     <div style="text-align: center; margin-top: 8px; font-size: 11px; color: var(--cream-dim); opacity: 0.7;">
                         Set to 0 to disable rebuys
                     </div>
+                </div>
+
+                <div id="urlLoadedHint" style="display:none; text-align:center; margin-bottom:16px; font-size:12px; color:var(--gold); opacity:0.7; letter-spacing:0.05em;">
+                    Settings loaded from shared link — adjust as needed
                 </div>
 
                 <div class="setup-actions">
@@ -1446,11 +1489,15 @@
             document.getElementById(screenName + 'Screen').classList.add('active');
             appState.screen = screenName;
 
-            // Request wake lock when entering timer screen
+            // Update atmosphere based on screen
             if (screenName === 'timer') {
+                updateAtmosphere();
                 await requestWakeLock();
             } else {
-                // Release wake lock when leaving timer screen
+                // Reset to default green
+                document.documentElement.style.setProperty('--atmo-felt', '#0d4a2e');
+                document.documentElement.style.setProperty('--atmo-felt-dark', '#0a3522');
+                document.documentElement.style.setProperty('--atmo-vignette', '0.4');
                 await releaseWakeLock();
             }
         }
@@ -1494,6 +1541,26 @@
             document.getElementById('playersDown').addEventListener('click', () => {
                 const input = document.getElementById('playersInput');
                 input.value = Math.max(2, parseInt(input.value || 0) - 1);
+            });
+
+            // Duration +/- buttons
+            document.getElementById('hoursUp').addEventListener('click', () => {
+                const input = document.getElementById('hoursInput');
+                input.value = Math.min(8, parseInt(input.value || 0) + 1);
+            });
+            document.getElementById('hoursDown').addEventListener('click', () => {
+                const input = document.getElementById('hoursInput');
+                input.value = Math.max(0, parseInt(input.value || 0) - 1);
+            });
+            document.getElementById('minutesUp').addEventListener('click', () => {
+                const input = document.getElementById('minutesInput');
+                const val = parseInt(input.value || 0) + 10;
+                input.value = val > 59 ? 0 : val;
+            });
+            document.getElementById('minutesDown').addEventListener('click', () => {
+                const input = document.getElementById('minutesInput');
+                const val = parseInt(input.value || 0) - 10;
+                input.value = val < 0 ? 50 : val;
             });
 
             // Starting Stack +/- buttons
@@ -1892,6 +1959,67 @@
             btnStartPause.classList.toggle('running', isRunning);
 
             updateLevelSelector();
+            updateAtmosphere();
+        }
+
+        function updateAtmosphere() {
+            if (appState.screen !== 'timer') {
+                // Reset to default green
+                document.documentElement.style.setProperty('--atmo-felt', '#0d4a2e');
+                document.documentElement.style.setProperty('--atmo-felt-dark', '#0a3522');
+                document.documentElement.style.setProperty('--atmo-vignette', '0.4');
+                return;
+            }
+
+            const totalLevels = LEVELS.length;
+            const progress = currentLevel / Math.max(totalLevels - 1, 1); // 0 to 1
+
+            // Phase 1 (0-40%): Calm green felt
+            // Phase 2 (40-70%): Transition to warm amber
+            // Phase 3 (70-100%): Deep red tension
+            let feltR, feltG, feltB, darkR, darkG, darkB, vignette;
+
+            if (progress < 0.4) {
+                const t = progress / 0.4;
+                // Green -> slightly warmer green
+                feltR = Math.round(13 + t * 15);
+                feltG = Math.round(74 - t * 10);
+                feltB = Math.round(46 - t * 10);
+                darkR = Math.round(10 + t * 10);
+                darkG = Math.round(53 - t * 10);
+                darkB = Math.round(34 - t * 10);
+                vignette = 0.4 + t * 0.05;
+            } else if (progress < 0.7) {
+                const t = (progress - 0.4) / 0.3;
+                // Warm green -> amber/brown
+                feltR = Math.round(28 + t * 40);
+                feltG = Math.round(64 - t * 30);
+                feltB = Math.round(36 - t * 20);
+                darkR = Math.round(20 + t * 25);
+                darkG = Math.round(43 - t * 22);
+                darkB = Math.round(24 - t * 14);
+                vignette = 0.45 + t * 0.1;
+            } else {
+                const t = (progress - 0.7) / 0.3;
+                // Amber -> deep red/dark
+                feltR = Math.round(68 + t * 30);
+                feltG = Math.round(34 - t * 20);
+                feltB = Math.round(16 - t * 5);
+                darkR = Math.round(45 + t * 20);
+                darkG = Math.round(21 - t * 12);
+                darkB = Math.round(10 - t * 3);
+                vignette = 0.55 + t * 0.15;
+            }
+
+            const felt = `rgb(${feltR}, ${feltG}, ${feltB})`;
+            const dark = `rgb(${darkR}, ${darkG}, ${darkB})`;
+            document.documentElement.style.setProperty('--atmo-felt', felt);
+            document.documentElement.style.setProperty('--atmo-felt-dark', dark);
+            document.documentElement.style.setProperty('--atmo-vignette', vignette.toString());
+
+            // Add tense class for late game visual effects
+            const timerScreen = document.getElementById('timerScreen');
+            timerScreen.classList.toggle('timer-screen-tense', progress > 0.7);
         }
 
         function createLevelSelector() {
@@ -2060,6 +2188,7 @@
                 });
             }
 
+            document.getElementById('urlLoadedHint').style.display = 'block';
             return true;
         }
 
@@ -2159,10 +2288,8 @@
         initSummaryHandlers();
         initTimerScreenHandlers();
 
-        // If URL has params, load them and auto-calculate
-        if (loadFromUrlParams()) {
-            document.getElementById('btnCalculate').click();
-        }
+        // If URL has params, just populate the setup form (user can review and change before calculating)
+        loadFromUrlParams();
     </script>
 </body>
 </html>
